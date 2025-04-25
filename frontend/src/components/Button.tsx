@@ -1,5 +1,7 @@
 'use client'
-import React from 'react'
+
+import React, { useState } from 'react'
+import Link from 'next/link'
 import { cn } from '@/lib/utils'
 
 export type ButtonVariant =
@@ -17,6 +19,10 @@ export interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElemen
   variant?: ButtonVariant
   /** Usa estilo outline */
   outline?: boolean
+  /** Se fornecido, o botão será renderizado como um link */
+  href?: string
+  /** Tempo de debounce em milissegundos para prevenir duplo clique */
+  debounceTime?: number
 }
 
 export default function Button({
@@ -24,13 +30,37 @@ export default function Button({
   outline = false,
   className,
   children,
+  href,
+  onClick,
+  disabled,
+  debounceTime = 500, // Default de 500ms para evitar duplo clique
   ...rest
 }: ButtonProps) {
+  const [isClicked, setIsClicked] = useState(false);
+
+  const handleClick = (e: React.MouseEvent<HTMLButtonElement | HTMLAnchorElement>) => {
+    if (isClicked || disabled) return;
+    
+    setIsClicked(true);
+    
+    // Reativar o botão após o período de debounce
+    setTimeout(() => {
+      setIsClicked(false);
+    }, debounceTime);
+    
+    // Executa o onClick original se existir
+    if (onClick) {
+      onClick(e as any);
+    }
+  };
+
   const base = cn(
     'inline-flex items-center justify-center px-4 py-2',
     'border-2 rounded-xl font-medium cursor-pointer',
-    'transition-colors transform transition-transform duration-200',
+    'transition-colors transform transition-transform duration-200 ease-in-out',
     'shadow-md hover:-translate-y-[1px]',
+    'active:translate-y-0 active:shadow-sm',
+    (isClicked || disabled) && 'opacity-70 cursor-not-allowed pointer-events-none'
   );
 
   const filledStyles: Record<ButtonVariant, string> = {
@@ -57,9 +87,27 @@ export default function Button({
 
   const style = outline ? outlineStyles[variant] : filledStyles[variant]
 
+  // Se href estiver presente, renderize um Link do Next.js
+  if (href) {
+    return (
+      <Link
+        href={href}
+        className={cn(base, style, className)}
+        onClick={handleClick}
+        aria-disabled={isClicked || disabled}
+        {...(rest as any)}
+      >
+        {children}
+      </Link>
+    );
+  }
+
+  // Caso contrário, renderize um botão normal
   return (
     <button
       className={cn(base, style, className)}
+      onClick={handleClick}
+      disabled={isClicked || disabled}
       {...rest}
     >
       {children}

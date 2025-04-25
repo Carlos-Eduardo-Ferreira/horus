@@ -26,9 +26,13 @@ export default function LoginPage() {
 
   return (
     <>
-      <Title className="mb-6" size="md" align="center">
-        Entrar
+      <Title className="mb-1" size="md" align="center">
+        Seja bem-vindo!
       </Title>
+      
+      <Text size="sm" align="center" className="mb-8">
+        Faça login para continuar
+      </Text>
 
       <form onSubmit={handleSubmit} className="flex flex-col space-y-4 sm:space-y-6">
         <div className="grid gap-6">
@@ -53,6 +57,11 @@ export default function LoginPage() {
               value={form.password}
               onChange={e => setForm({ ...form, password: e.target.value })}
             />
+            <div className="mt-2 text-right">
+              <TextLink href="/auth/recover-password" size="xs" tabIndex={3}>
+                Esqueceu sua senha?
+              </TextLink>
+            </div>
           </div>
         </div>
 
@@ -60,14 +69,14 @@ export default function LoginPage() {
           type="submit"
           variant="primary"
           className="w-full"
-          tabIndex={3}
+          tabIndex={4}
         >
           Entrar
         </Button>
 
         <Text size="xs" align="center">
           Não tem conta?{' '}
-          <TextLink href="/auth/register" size="sm" tabIndex={4}>
+          <TextLink href="/auth/register" size="sm" tabIndex={5}>
             Crie sua conta
           </TextLink>
         </Text>

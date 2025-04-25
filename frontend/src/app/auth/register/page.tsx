@@ -1,12 +1,13 @@
 'use client'
+
 import { useState } from 'react'
-import { IoArrowBack } from "react-icons/io5"
 import { maskCpfCnpj } from '@/utils/maskCpfCnpj'
 import LabeledInput from '@/components/LabeledInput'
 import Title from '@/components/Title'
 import TextLink from '@/components/TextLink'
 import Text from '@/components/Text'
 import Button from '@/components/Button'
+import { IoIosArrowBack } from 'react-icons/io'
 
 type UserType = 'consumer' | 'company' | null;
 
@@ -44,13 +45,13 @@ export default function RegisterPage() {
   if (userType === null) {
     return (
       <>
-        <Title className="mb-6" size="md" align="center">
+        <Title className="mb-1" size="md" align="center">
           Crie sua conta
         </Title>
         
         <div className="flex flex-col space-y-4 sm:space-y-6">
-          <Text size="sm" align="center" className="mb-4">
-            Selecione o tipo de conta que deseja criar:
+          <Text size="sm" align="center" className="mb-6">
+            Selecione o tipo de conta que deseja criar
           </Text>
           
           <div className="flex flex-row gap-4 w-full">
@@ -86,18 +87,20 @@ export default function RegisterPage() {
 
   return (
     <>
-      <Title className="mb-6" size="md" align="center">
+      <div className="mb-6">
+        <TextLink 
+          size="sm" 
+          variant="secondary"
+          className="flex items-center"
+          onClick={() => setUserType(null)}
+        >
+          <IoIosArrowBack className="mr-2 text-[var(--link-color)]" /> Voltar
+        </TextLink>
+      </div>
+      
+      <Title className="mb-8" size="md" align="center">
         {userType === 'consumer' ? 'Cadastro de Consumidor' : 'Cadastro de Empresa'}
       </Title>
-      
-      <Button 
-        variant="secondary"
-        outline
-        className="mb-6" 
-        onClick={() => setUserType(null)}
-      >
-        <IoArrowBack className="mr-2" /> Voltar
-      </Button>
 
       <form onSubmit={handleSubmit} className="flex flex-col space-y-4 sm:space-y-6">
         <div className="grid gap-6">
