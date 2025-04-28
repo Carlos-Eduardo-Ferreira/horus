@@ -1,7 +1,7 @@
 'use client'
 
 import React, { useState } from 'react'
-import { cn } from '@/lib/utils'
+import { cn } from '@/lib/classNames'
 
 export interface TextLinkProps extends React.AnchorHTMLAttributes<HTMLAnchorElement> {
   /** Tamanho do link */

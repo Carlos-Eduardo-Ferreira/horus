@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { maskCpfCnpj } from '@/utils/maskCpfCnpj'; 
+import { maskCpfCnpj } from '@/lib/maskCpfCnpj'; 
 import LabeledInput from '@/components/LabeledInput';
 import Title from '@/components/Title';
 import Button from '@/components/Button';
