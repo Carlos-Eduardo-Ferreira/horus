@@ -25,7 +25,7 @@ export default function RecoverPasswordPage() {
           variant="secondary"
           className="flex items-center"
         >
-          <IoIosArrowBack className="mr-2 text-[var(--link-color)]" /> Voltar
+          <IoIosArrowBack className="mr-2 text-indigo-500" /> Voltar
         </TextLink>
       </div>
 

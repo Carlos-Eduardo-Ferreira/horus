@@ -4,8 +4,8 @@ import React from 'react'
 import { cn } from '@/lib/classNames'
 
 export interface LabeledInputProps extends React.InputHTMLAttributes<HTMLInputElement> {
-  /** Texto que aparece “flutuando” acima do input */
   title: string
+  error?: string
 }
 
 export default function LabeledInput({
@@ -17,6 +17,7 @@ export default function LabeledInput({
   onChange,
   className,
   tabIndex,
+  error,
   ...rest
 }: LabeledInputProps) {
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -24,7 +25,7 @@ export default function LabeledInput({
   }
 
   return (
-    <div className="relative">
+    <div className="relative flex flex-col gap-1">
       <input
         id={id}
         type={type}
@@ -36,14 +37,16 @@ export default function LabeledInput({
         className={cn(
           'w-full px-4 h-11 flex items-center transition-all',
           'rounded-xl',
-          'bg-[var(--labeled-input-bg)]',
-          'border border-gray-300',
+          'bg-white',
+          'border',
+          error ? 'border-red-500' : 'border-gray-300',
           'shadow-md',
           'hover:-translate-y-[1px]',
-          'text-[var(--labeled-input-text)]',
+          'text-gray-700',
           'focus:outline-none',
-          'focus:border-[var(--labeled-input-focus)]',
-          'focus:ring-1 focus:ring-[var(--labeled-input-focus)]',
+          error
+            ? 'focus:border-red-500 focus:ring-1 focus:ring-red-500'
+            : 'focus:border-gray-600 focus:ring-1 focus:ring-gray-600',
           'transform transition-transform duration-200',
           className
         )}
@@ -51,18 +54,19 @@ export default function LabeledInput({
         {...rest}
       />
 
-      {/* Label “flutuante” */}
       <div className="absolute left-4 -top-3 pointer-events-none">
         <div className="relative">
-          {/* Topo: fundo do input */}
-          <div className="absolute inset-0 top-1/2 h-1/2 bg-[var(--labeled-input-bg)]" />
-          {/* Base: fundo do form de autenticação */}
+          <div className="absolute inset-0 top-1/2 h-1/2 bg-white" />
           <div className="absolute inset-0 bottom-1/2 h-1/2 bg-[var(--auth-form-background)]" />
-          <span className="relative px-1 text-sm text-[var(--labeled-text)]">
+          <span className="relative px-1 text-sm text-gray-600">
             {title}
           </span>
         </div>
       </div>
+
+      {error && (
+        <span className="text-xs text-red-500 ml-1">{error}</span>
+      )}
     </div>
   )
 }

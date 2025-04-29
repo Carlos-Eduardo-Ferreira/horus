@@ -4,9 +4,7 @@ import React from 'react'
 import { cn } from '@/lib/classNames'
 
 export interface TitleProps extends React.HTMLAttributes<HTMLHeadingElement> {
-  /** Tamanho do título */
   size?: 'xs' | 'sm' | 'md' | 'lg' | 'xl'
-  /** Alinhamento do texto */
   align?: 'left' | 'center' | 'right'
 }
 
@@ -37,7 +35,7 @@ export default function Title({
         sizeClass,
         'font-bold',
         alignClass,
-        'text-[var(--text-color)]',
+        'text-gray-900',
         className
       )}
       {...rest}

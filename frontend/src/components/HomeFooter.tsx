@@ -1,9 +1,9 @@
-'use client';
+'use client'
 
-import { FaWhatsapp, FaEnvelope, FaPhone } from 'react-icons/fa';
+import { FaWhatsapp, FaEnvelope, FaPhone } from 'react-icons/fa'
 
 export default function HomeFooter() {
-  const currentYear = new Date().getFullYear();
+  const currentYear = new Date().getFullYear()
   
   return (
     <footer className="bg-white shadow-md py-6 px-4">
@@ -15,17 +15,17 @@ export default function HomeFooter() {
           
           <div className="flex flex-col md:flex-row gap-4 md:gap-8 items-center">
             <div className="flex items-center">
-              <FaPhone className="mr-2 text-[var(--link-color)]" />
+              <FaPhone className="mr-2 text-indigo-500" />
               <span>(00) 0000-0000</span>
             </div>
             
             <div className="flex items-center">
-              <FaWhatsapp className="mr-2 text-[var(--link-color)]" />
+              <FaWhatsapp className="mr-2 text-indigo-500" />
               <span>(00) 00000-0000</span>
             </div>
             
             <div className="flex items-center">
-              <FaEnvelope className="mr-2 text-[var(--link-color)]" />
+              <FaEnvelope className="mr-2 text-indigo-500" />
               <span>contato@empresa.com.br</span>
             </div>
           </div>
@@ -36,5 +36,5 @@ export default function HomeFooter() {
         </div>
       </div>
     </footer>
-  );
-} 
+  )
+}

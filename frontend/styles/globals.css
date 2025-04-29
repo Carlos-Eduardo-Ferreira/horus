@@ -11,57 +11,6 @@ body {
 :root {
   /* Autenticação e input */
   --auth-form-background: #fafafa;
-  --labeled-input-bg: #ffffff;
-  --labeled-input-border: #d1d5db;
-  --labeled-input-focus: #6c757d;
-  --labeled-input-text: #4b5563;
-  --labeled-text: #6b7280;
-
-  /* Texto e link */
-  --text-color: #1f2937;
-  --link-color: #727cf5;
-  --link-hover: #6366f1;
-
-  /* Botões */
-  --btn-primary-bg: #727cf5;
-  --btn-primary-text: #ffffff;
-  --btn-primary-border: #727cf5;
-  --btn-primary-hover: #6366f1;
-
-  --btn-secondary-bg: #6c757d;
-  --btn-secondary-text: #ffffff;
-  --btn-secondary-border: #6c757d;
-  --btn-secondary-hover: #565e64;
-
-  --btn-success-bg: #198754;
-  --btn-success-text: #ffffff;
-  --btn-success-border: #198754;
-  --btn-success-hover: #146c43;
-
-  --btn-danger-bg: #dc3545;
-  --btn-danger-text: #ffffff;
-  --btn-danger-border: #dc3545;
-  --btn-danger-hover: #b02a37;
-
-  --btn-warning-bg: #ffc107;
-  --btn-warning-text: #212529;
-  --btn-warning-border: #ffc107;
-  --btn-warning-hover: #d39e00;
-
-  --btn-info-bg: #0dcaf0;
-  --btn-info-text: #212529;
-  --btn-info-border: #0dcaf0;
-  --btn-info-hover: #31d2f2;
-
-  --btn-light-bg: #f8f9fa;
-  --btn-light-text: #212529;
-  --btn-light-border: #f8f9fa;
-  --btn-light-hover: #e2e6ea;
-
-  --btn-dark-bg: #212529;
-  --btn-dark-text: #ffffff;
-  --btn-dark-border: #212529;
-  --btn-dark-hover: #1c1f23;
 }
 
 /* Estilização do formulário da tela de autenticação */

@@ -2,18 +2,18 @@
 
 namespace App\Models;
 
-// use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Laravel\Sanctum\HasApiTokens;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class User extends Authenticatable
 {
-    /** @use HasFactory<\Database\Factories\UserFactory> */
-    use HasFactory, Notifiable;
+    use HasFactory, Notifiable, HasApiTokens, SoftDeletes;
 
     /**
-     * The attributes that are mass assignable.
+     * Atributos que podem ser atribuídos em massa.
      *
      * @var list<string>
      */
@@ -21,10 +21,12 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
+        'type',
+        'document',
     ];
 
     /**
-     * The attributes that should be hidden for serialization.
+     * Atributos que devem ser ocultados na serialização.
      *
      * @var list<string>
      */
@@ -34,14 +36,17 @@ class User extends Authenticatable
     ];
 
     /**
-     * Get the attributes that should be cast.
+     * Define os atributos que devem ser convertidos em tipos nativos.
      *
      * @return array<string, string>
      */
     protected function casts(): array
     {
         return [
+            // Converte o campo 'email_verified_at' para um objeto DateTime
             'email_verified_at' => 'datetime',
+
+            // Indica que o 'password' deve ser automaticamente criptografado
             'password' => 'hashed',
         ];
     }
