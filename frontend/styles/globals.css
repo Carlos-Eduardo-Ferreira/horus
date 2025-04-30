@@ -9,11 +9,15 @@ body {
 
 /* Variáveis globais */
 :root {
-  /* Autenticação e input */
-  --auth-form-background: #fafafa;
+  --muted-background: #fafafa;
+  --common-background: #ffffff;
 }
 
-/* Estilização do formulário da tela de autenticação */
-.auth-form-wrapper {
-  @apply bg-[var(--auth-form-background)] p-6 sm:p-8 md:p-10 rounded-lg shadow-2xl;
+/* Classes de background */
+.bg-muted {
+  background-color: var(--muted-background);
+}
+
+.bg-common {
+  background-color: var(--common-background);
 }

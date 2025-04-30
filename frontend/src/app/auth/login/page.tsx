@@ -148,9 +148,10 @@ export default function LoginPage() {
 
       {/* Formulário de login */}
       <form onSubmit={handleSubmit}>
-        <div className="flex flex-col space-y-4 sm:space-y-6">
+        <div className="flex flex-col space-y-6">
           {/* Campo de CPF/CNPJ */}
           <LabeledInput
+            mutedBackground
             id="document"
             title="CPF/CNPJ"
             type="text"
@@ -163,6 +164,7 @@ export default function LoginPage() {
 
           {/* Campo de Senha */}
           <LabeledInput
+            mutedBackground
             id="password"
             title="Senha"
             type="password"

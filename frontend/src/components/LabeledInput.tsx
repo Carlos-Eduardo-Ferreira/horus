@@ -6,6 +6,7 @@ import { cn } from '@/lib/classNames'
 export interface LabeledInputProps extends React.InputHTMLAttributes<HTMLInputElement> {
   title: string
   error?: string
+  mutedBackground?: boolean
 }
 
 export default function LabeledInput({
@@ -18,11 +19,14 @@ export default function LabeledInput({
   className,
   tabIndex,
   error,
+  mutedBackground = false,
   ...rest
 }: LabeledInputProps) {
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     onChange?.(e)
   }
+
+  const labelBackground = mutedBackground ? 'bg-muted' : 'bg-common';
 
   return (
     <div className="relative flex flex-col gap-1">
@@ -57,7 +61,7 @@ export default function LabeledInput({
       <div className="absolute left-4 -top-3 pointer-events-none">
         <div className="relative">
           <div className="absolute inset-0 top-1/2 h-1/2 bg-white" />
-          <div className="absolute inset-0 bottom-1/2 h-1/2 bg-[var(--auth-form-background)]" />
+          <div className={`absolute inset-0 bottom-1/2 h-1/2 ${labelBackground}`} />
           <span className="relative px-1 text-sm text-gray-600">
             {title}
           </span>

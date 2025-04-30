@@ -163,7 +163,7 @@ export default function RegisterPage() {
           Crie sua conta
         </Title>
         
-        <div className="flex flex-col space-y-4 sm:space-y-6">
+        <div className="flex flex-col space-y-6">
           <Text size="sm" align="center" className="mb-6">
             Selecione o tipo de conta que deseja criar
           </Text>
@@ -227,12 +227,13 @@ export default function RegisterPage() {
         </Text>
       )}
 
-      <form onSubmit={handleSubmit} className="flex flex-col space-y-4 sm:space-y-6">
+      <form onSubmit={handleSubmit} className="flex flex-col space-y-6">
         <div className="grid gap-6">
           {userType === 'consumer' ? (
             <>
               <div>
                 <LabeledInput
+                  mutedBackground
                   id="name"
                   title="Nome"
                   type="text"
@@ -245,6 +246,7 @@ export default function RegisterPage() {
 
               <div>
                 <LabeledInput
+                  mutedBackground
                   id="document"
                   title="CPF"
                   type="text"
@@ -258,6 +260,7 @@ export default function RegisterPage() {
 
               <div>
                 <LabeledInput
+                  mutedBackground
                   id="email"
                   title="Endereço de e-mail"
                   type="email"
@@ -271,6 +274,7 @@ export default function RegisterPage() {
           ) : (
             <div>
               <LabeledInput
+                mutedBackground
                 id="document"
                 title="CNPJ"
                 type="text"
@@ -285,6 +289,7 @@ export default function RegisterPage() {
 
           <div>
             <LabeledInput
+              mutedBackground
               id="password"
               title="Senha"
               type="password"
@@ -297,6 +302,7 @@ export default function RegisterPage() {
 
           <div>
             <LabeledInput
+              mutedBackground
               id="password_confirmation"
               title="Confirmar senha"
               type="password"

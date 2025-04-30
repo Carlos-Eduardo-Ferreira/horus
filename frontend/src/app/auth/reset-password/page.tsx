@@ -37,10 +37,11 @@ export default function ResetPasswordPage() {
         Escolha sua nova senha
       </Text>
 
-      <form onSubmit={handleSubmit} className="flex flex-col space-y-4 sm:space-y-6">
+      <form onSubmit={handleSubmit} className="flex flex-col space-y-6">
         <div className="grid gap-6">
           <div>
             <LabeledInput
+              mutedBackground
               id="password"
               title="Nova senha"
               type="password"
@@ -53,6 +54,7 @@ export default function ResetPasswordPage() {
 
           <div>
             <LabeledInput
+              mutedBackground
               id="confirmPassword"
               title="Confirmar senha"
               type="password"
@@ -80,4 +82,4 @@ export default function ResetPasswordPage() {
       </form>
     </>
   );
-} 
+}

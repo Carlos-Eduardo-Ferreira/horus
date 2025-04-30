@@ -8,7 +8,7 @@ import { FaCommentAlt } from 'react-icons/fa';
 
 export default function HomePage() {
   return (
-    <div className="min-h-screen flex flex-col bg-[#fafafa]">
+    <div className="min-h-screen flex flex-col bg-muted">
       <HomeHeader />
       
       {/* Conteúdo principal */}
@@ -34,7 +34,7 @@ export default function HomePage() {
         </section>
         
         {/* Seção Sobre nós */}
-        <section className="py-12 px-4 bg-white">
+        <section className="py-12 px-4 bg-common">
           <div className="container mx-auto max-w-4xl">
             <Title size="lg" align="center" className="mb-6">
               Sobre nós
