@@ -1,7 +1,7 @@
 'use client'
 
 import React from 'react'
-import { cn } from '@/lib/classNames'
+import { cn } from '@/utils/classNames'
 
 export interface TitleProps extends React.HTMLAttributes<HTMLHeadingElement> {
   size?: 'xs' | 'sm' | 'md' | 'lg' | 'xl'

@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import axios from 'axios';
 import { Loader2 } from 'lucide-react';
-import { maskCpfCnpj } from '@/lib/maskCpfCnpj';
+import { maskCpfCnpj } from '@/utils/maskCpfCnpj';
 import { authService } from '@/services/auth';
 import { validateLoginForm } from '@/validators/loginValidator';
 import LabeledInput from '@/components/LabeledInput';

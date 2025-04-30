@@ -1,7 +1,7 @@
 'use client'
 
 import React, { useState } from 'react'
-import { cn } from '@/lib/classNames'
+import { cn } from '@/utils/classNames'
 
 export interface TextLinkProps extends React.AnchorHTMLAttributes<HTMLAnchorElement> {
   size?: 'xs' | 'sm' | 'md' | 'lg' | 'xl'

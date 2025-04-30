@@ -2,7 +2,7 @@
 
 import React from 'react'
 import Link from 'next/link'
-import { cn } from '@/lib/classNames'
+import { cn } from '@/utils/classNames'
 
 export type ButtonVariant =
   | 'primary'
