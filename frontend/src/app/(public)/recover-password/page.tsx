@@ -20,7 +20,7 @@ export default function RecoverPasswordPage() {
     <>
       <div className="mb-6">
         <TextLink 
-          href="/auth/login" 
+          href="/login" 
           size="sm" 
           variant="secondary"
           className="flex items-center"

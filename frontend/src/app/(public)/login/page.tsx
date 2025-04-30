@@ -177,7 +177,7 @@ export default function LoginPage() {
 
         {/* Link para recuperação de senha */}
         <div className="text-right mt-1 mb-6">
-          <TextLink href="/auth/recover-password" size="xs" tabIndex={3}>
+          <TextLink href="/recover-password" size="xs" tabIndex={3}>
             Esqueceu sua senha?
           </TextLink>
         </div>
@@ -203,7 +203,7 @@ export default function LoginPage() {
         {/* Link para criação de conta */}
         <Text size="xs" align="center" className="mt-3">
           Não tem conta?{' '}
-          <TextLink href="/auth/register" size="sm" tabIndex={5}>
+          <TextLink href="/register" size="sm" tabIndex={5}>
             Crie sua conta
           </TextLink>
         </Text>

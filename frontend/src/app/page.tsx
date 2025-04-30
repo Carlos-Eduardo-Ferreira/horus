@@ -17,14 +17,14 @@ export default function HomePage() {
         <section className="py-12 px-4">
           <div className="container mx-auto text-center max-w-3xl">
             <Title size="xl" align="center" className="mb-4">
-              Bem-vindo à nossa plataforma
+              Home
             </Title>
             <p className="text-lg text-gray-600 mb-8">
-              Estamos construindo algo incrível para você.
+              Conteúdo da home
             </p>
             
             <Button 
-              href="/auth/login"
+              href="/login"
               variant="primary"
               className="inline-flex items-center px-6 py-3"
             >
@@ -42,13 +42,7 @@ export default function HomePage() {
             
             <div className="text-gray-700">
               <p>
-                Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam in dui mauris. Vivamus hendrerit arcu sed erat molestie vehicula. Sed auctor neque eu tellus rhoncus ut eleifend nibh porttitor. Ut in nulla enim. Phasellus molestie magna non est bibendum non venenatis nisl tempor.
-              </p>
-              <p>
-                Suspendisse in orci enim. Donec sed ligula in lacus ultricies sagittis. Suspendisse potenti. Class aptent taciti sociosqu ad litora torquent per conubia nostra, per inceptos himenaeos. Aliquam dapibus ipsum vitae sem convallis sollicitudin. Cras mattis consectetur consectetur.
-              </p>
-              <p>
-                Maecenas faucibus mollis interdum. Etiam porta sem malesuada magna mollis euismod. Cum sociis natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus. Duis mollis, est non commodo luctus, nisi erat porttitor ligula, eget lacinia odio sem nec elit.
+                Conteúdo da seção sobre nós
               </p>
             </div>
           </div>

@@ -11,10 +11,10 @@ export default function DashboardPage() {
         <section className="py-12 px-4">
           <div className="container mx-auto text-center max-w-3xl">
             <Title size="xl" align="center" className="mb-4">
-              Bem-vindo à nossa plataforma
+              Dashboard
             </Title>
             <p className="text-lg text-gray-600 mb-8">
-              Estamos construindo algo incrível para você.
+              conteúdo do dashboard
             </p>
           </div>
         </section>

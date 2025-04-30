@@ -190,7 +190,7 @@ export default function RegisterPage() {
           
           <Text size="xs" align="center">
             Já tem uma conta?{' '}
-            <TextLink href="/auth/login" size="sm">
+            <TextLink href="/login" size="sm">
               Entrar
             </TextLink>
           </Text>
@@ -332,7 +332,7 @@ export default function RegisterPage() {
 
         <Text size="xs" align="center">
           Já tem uma conta?{' '}
-          <TextLink href="/auth/login" size="sm">
+          <TextLink href="/login" size="sm">
             Entrar
           </TextLink>
         </Text> 

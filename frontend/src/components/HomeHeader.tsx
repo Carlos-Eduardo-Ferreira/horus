@@ -8,7 +8,7 @@ export default function HomeHeader() {
       <div className="container mx-auto flex justify-end">
         <div className="flex space-x-3">
           <Button 
-            href="/auth/register"
+            href="/register"
             variant="secondary"
             outline
             className="px-6"
@@ -17,7 +17,7 @@ export default function HomeHeader() {
           </Button>
           
           <Button 
-            href="/auth/login"
+            href="/login"
             variant="primary"
             outline
             className="px-6"
