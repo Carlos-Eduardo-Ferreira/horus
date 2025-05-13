@@ -14,10 +14,15 @@ import Image from "next/image";
 const iconSize = 20;
 
 const SidebarMenu = () => {
-  const { isMenuOpen } = useGlobalHook();
+  const { isMenuOpen, toggleMenu } = useGlobalHook();
   const [openSubMenu, setOpenSubMenu] = useState<number | null>(null);
+  const [initialRender, setInitialRender] = useState(true);
   const router = useRouter();
-  const { toggleMenu } = useGlobalHook();
+
+  useEffect(() => {
+    // Marcar que o componente já foi renderizado após a montagem
+    setInitialRender(false);
+  }, []);
 
   const toggleSubMenu = (index: number) => {
     setOpenSubMenu(openSubMenu === index ? null : index);
@@ -54,21 +59,21 @@ const SidebarMenu = () => {
   };
 
   return (
+    // Durante a primeira renderização, use as classes CSS estáticas para evitar deformação
     <motion.div
       className={`h-screen flex flex-col bg-gray-900 z-40
-        ${!isMenuOpen && "hidden md:block"}
-        ${
-          isMenuOpen &&
-          "w-20 md:w-98 max-md:w-full max-md:absolute max-md:h-screen"
-        }
-        `}
+        ${initialRender && !isMenuOpen ? "hidden md:block md:w-[88px]" : ""}
+        ${initialRender && isMenuOpen ? "md:w-[15rem] max-md:w-full max-md:absolute max-md:h-screen" : ""}
+        ${!initialRender && isMenuOpen ? "max-md:w-full max-md:absolute max-md:h-screen" : "hidden md:block"}
+        ${!initialRender && isMenuOpen ? "md:w-98" : "md:w-20"}
+      `}
       variants={sidebarVariants}
-      initial={isMenuOpen ? "open" : "closed"}
+      initial={false}
       animate={isMenuOpen ? "open" : "closed"}
     >
       <div
         className={
-          "flex items-center justify-center max-md:justify-between"
+          "flex items-center justify-center max-md:justify-between max-md:px-4"
         }
       >
         <Image
@@ -80,7 +85,7 @@ const SidebarMenu = () => {
           style={{ width: isMenuOpen ? "150px" : "44px", height: "64px" }}
           priority
         />
-        <button className="md:hidden pb-9 text-white">
+        <button className="md:hidden pb-4 color-side-bar-item">
           <CgClose
             size={iconSize}
             className="bg-transparent"

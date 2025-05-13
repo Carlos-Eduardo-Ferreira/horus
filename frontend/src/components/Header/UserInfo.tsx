@@ -115,15 +115,15 @@ const UserInfo = () => {
         onClick={() => setIsMenuOpen(!isMenuOpen)}
       >
         {user?.image ? (
-          <div className="w-[42px] h-[42px] rounded-full overflow-hidden mr-4">
+          <div className="w-[42px] h-[42px] rounded-full overflow-hidden mr-2 md:mr-4">
             <Image src={user.image} alt={user.name} width={42} height={42} />
           </div>
         ) : (
-          <div className="w-[42px] h-[42px] rounded-full bg-gray-300 flex items-center justify-center text-xl font-bold text-white mr-4">
+          <div className="w-[42px] h-[42px] rounded-full bg-gray-300 flex items-center justify-center text-xl font-bold text-white mr-2 md:mr-4">
             {user?.name?.charAt(0).toUpperCase() || "U"}
           </div>
         )}
-        <div className="flex flex-col mr-8">
+        <div className="flex flex-col mr-2 md:mr-8">
           <span className="text-md font-bold">{user?.name ?? "Usuário"}</span>
           <span className="text-sm">{UserRoleFormatted(user)}</span>
         </div>

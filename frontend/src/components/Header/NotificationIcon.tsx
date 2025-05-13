@@ -14,10 +14,31 @@ const NotificationIcon = () => {
   const [showDropdown, setShowDropdown] = useState(false);
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [showAllNotifications, setShowAllNotifications] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
+  useEffect(() => {
+    const checkIfMobile = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+    
+    // Verificar inicialmente
+    checkIfMobile();
+    
+    // Adicionar listener para redimensionamento
+    window.addEventListener('resize', checkIfMobile);
+    
+    return () => window.removeEventListener('resize', checkIfMobile);
+  }, []);
+
   const toggleDropdown = () => {
-    setShowDropdown(!showDropdown);
+    if (isMobile) {
+      // No mobile, abrir diretamente o modal de todas as notificações
+      setShowAllNotifications(true);
+    } else {
+      // No desktop, mostrar dropdown normal
+      setShowDropdown(!showDropdown);
+    }
   };
 
   useEffect(() => {
@@ -30,15 +51,32 @@ const NotificationIcon = () => {
     );
 
     setHasNotifications(unreadNotifications.length > 0);
-  }, []);
+    
+    // Fechar o dropdown quando mudar para mobile
+    if (isMobile) {
+      setShowDropdown(false);
+    }
+  }, [isMobile]);
 
   const handleOpenAllNotifications = () => {
     setShowDropdown(false);
     setShowAllNotifications(true);
   };
 
+  useEffect(() => {
+    // Fechar dropdown ao clicar fora dele
+    const handleClickOutside = (event: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setShowDropdown(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
   return (
-    <div className="relative mr-6" ref={dropdownRef}>
+    <div className="relative mr-2 md:mr-6" ref={dropdownRef}>
       <div onClick={toggleDropdown} className="relative cursor-pointer group">
         <LuBell className="w-6 h-6 text-gray-600 group-hover:color-primary" />
         {hasNotifications && (
@@ -46,19 +84,18 @@ const NotificationIcon = () => {
         )}
       </div>
       <AnimatePresence>
-        {showDropdown && (
+        {showDropdown && !isMobile && (
           <motion.div
             initial={{ opacity: 0, y: -10 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -10 }}
             transition={{ duration: 0.3 }}
-            className="absolute right-0 mt-4 w-[460px] bg-white shadow-lg rounded-lg overflow-hidden z-20 
-            max-md:w-[420px] max-sm:w-[360px] max-sm:-right-52"
+            className="absolute right-0 mt-4 w-[460px] bg-white shadow-lg rounded-lg overflow-hidden z-20"
           >
             <div>
-            <Title size="sm" align="left" className="p-3">
-              Notificações
-            </Title>
+              <Title size="sm" align="left" className="p-3">
+                Notificações
+              </Title>
             </div>
             <div className="">
               {notifications.map((notification) => (
@@ -89,6 +126,7 @@ const NotificationIcon = () => {
         isOpen={showAllNotifications}
         onClose={() => setShowAllNotifications(false)}
         title="Notificações"
+        fullScreenOnMobile={true}
       >
         <div className="">
           {notificationsData.map((notification) => (

@@ -26,10 +26,10 @@ const menuSideBarItem: IMenuSideBarProps[] = [
     icon: IoDocumentTextOutline,
     subMenu: true,
     subMenuItems: [
-      { id: 1, title: "SubMenu Relatórios 1", path: "#" },
-      { id: 2, title: "SubMenu Relatórios 2", path: "#" },
-      { id: 3, title: "SubMenu Relatórios 3", path: "#" },
-      { id: 4, title: "SubMenu Relatórios 4", path: "#" },
+      { id: 1, title: "Relatórios 1", path: "#" },
+      { id: 2, title: "Relatórios 2", path: "#" },
+      { id: 3, title: "Relatórios 3", path: "#" },
+      { id: 4, title: "Relatórios 4", path: "#" },
     ],
   },
   {
@@ -39,10 +39,10 @@ const menuSideBarItem: IMenuSideBarProps[] = [
     icon: MdSettings,
     subMenu: true,
     subMenuItems: [
-      { id: 1, title: "SubMenu Configurações 1", path: "#" },
-      { id: 2, title: "SubMenu Configurações 2", path: "#" },
-      { id: 3, title: "SubMenu Configurações 3", path: "#" },
-      { id: 4, title: "SubMenu Configurações 4", path: "#" },
+      { id: 1, title: "Configurações 1", path: "#" },
+      { id: 2, title: "Configurações 2", path: "#" },
+      { id: 3, title: "Configurações 3", path: "#" },
+      { id: 4, title: "Configurações 4", path: "#" },
     ],
   },
   {

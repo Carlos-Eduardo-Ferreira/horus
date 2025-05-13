@@ -47,7 +47,7 @@ const SubMenu = ({
       {_menuSideBarItem.subMenuItems!.map((Subitem, Subindex) => (
         <div key={Subindex}>
           <Link
-            className={`text-white text-sm p-1 bg-gray-900/100 color-hover-primary flex items-center h-11 ${
+            className={`text-white text-sm p-1 bg-gray-900/100 color-hover-primary flex items-center min-h-[2.75rem] ${
               !isMenuOpen ? "last:rounded-br-lg pl-18" : "pl-12"
             }`}
             href={Subitem.path!}
