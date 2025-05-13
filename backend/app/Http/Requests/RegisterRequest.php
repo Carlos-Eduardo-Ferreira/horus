@@ -40,7 +40,12 @@ class RegisterRequest extends FormRequest
             'type' => 'required|string|in:consumer,company',
             
             // O documento é obrigatório, deve ser único e validado por uma regra customizada
-            'document' => ['required', 'string', 'unique:users', new DocumentRule],
+            'document' => [
+                'required',
+                'string',
+                'unique:users,document',
+                new DocumentRule
+            ],
         ];
     }
 
@@ -62,7 +67,7 @@ class RegisterRequest extends FormRequest
             'type.required' => 'O type é obrigatório',
             'type.in' => 'O type deve ser consumer ou company',
             'document.required' => 'O número do documento é obrigatório',
-            'document.unique' => 'Este documento já está cadastrado',
+            'document.unique' => 'Este documento já está cadastrado no sistema',
             'document.forEach' => 'O documento deve ter exatamente :length dígitos para :type',
         ];
     }
