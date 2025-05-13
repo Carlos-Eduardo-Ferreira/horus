@@ -12,7 +12,6 @@ export type ButtonVariant =
   | 'warning'
   | 'info'
   | 'light'
-  | 'dark'
 
 export interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   variant?: ButtonVariant
@@ -42,25 +41,23 @@ export default function Button({
   )
 
   const filledStyles: Record<ButtonVariant, string> = {
-    primary: 'bg-indigo-500 text-white border-indigo-500 hover:bg-indigo-600',
-    secondary: 'bg-gray-600 text-white border-gray-600 hover:bg-gray-700',
-    success: 'bg-green-600 text-white border-green-600 hover:bg-green-700',
-    danger: 'bg-red-600 text-white border-red-600 hover:bg-red-700',
-    warning: 'bg-yellow-500 text-gray-900 border-yellow-500 hover:bg-yellow-600',
-    info: 'bg-cyan-500 text-gray-900 border-cyan-500 hover:bg-cyan-600',
-    light: 'bg-gray-100 text-gray-900 border-gray-100 hover:bg-gray-200',
-    dark: 'bg-gray-900 text-white border-gray-900 hover:bg-gray-800',
+    primary: 'bg-indigo-400 text-white border-indigo-400 hover:bg-indigo-500 hover:border-indigo-500',
+    secondary: 'bg-gray-600 text-white border-gray-600 hover:bg-gray-700 hover:border-gray-700',
+    success: 'bg-green-500 text-white border-green-500 hover:bg-green-600 hover:border-green-600',
+    danger: 'bg-red-400 text-white border-red-400 hover:bg-red-500 hover:border-red-500',
+    warning: 'bg-amber-400 text-gray-700 border-amber-400 hover:bg-yellow-500 hover:border-yellow-500',
+    info: 'bg-cyan-600 text-white border-cyan-600 hover:bg-cyan-700 hover:border-cyan-700',
+    light: 'bg-gray-100 text-gray-700 border-gray-100 hover:bg-gray-200 hover:border-gray-200',
   }
 
   const outlineStyles: Record<ButtonVariant, string> = {
-    primary: 'bg-white text-indigo-500 border-indigo-500 hover:bg-indigo-500 hover:text-white',
+    primary: 'bg-white text-indigo-400 border-indigo-400 hover:bg-indigo-400 hover:text-white',
     secondary: 'bg-white text-gray-600 border-gray-600 hover:bg-gray-600 hover:text-white',
-    success: 'bg-white text-green-600 border-green-600 hover:bg-green-600 hover:text-white',
-    danger: 'bg-white text-red-600 border-red-600 hover:bg-red-600 hover:text-white',
-    warning: 'bg-white text-yellow-500 border-yellow-500 hover:bg-yellow-500 hover:text-gray-900',
-    info: 'bg-white text-cyan-500 border-cyan-500 hover:bg-cyan-500 hover:text-gray-900',
-    light: 'bg-white text-gray-100 border-gray-100 hover:bg-gray-100 hover:text-gray-900',
-    dark: 'bg-white text-gray-900 border-gray-900 hover:bg-gray-900 hover:text-white',
+    success: 'bg-white text-green-500 border-green-500 hover:bg-green-500 hover:text-white',
+    danger: 'bg-white text-red-400 border-red-400 hover:bg-red-400 hover:text-white',
+    warning: 'bg-white text-yellow-500 border-amber-400 hover:bg-amber-400 hover:text-gray-700',
+    info: 'bg-white text-cyan-600 border-cyan-600 hover:bg-cyan-600 hover:text-gray-700',
+    light: 'bg-white text-gray-100 border-gray-100 hover:bg-gray-100 hover:text-gray-700',
   }
 
   const style = outline ? outlineStyles[variant] : filledStyles[variant]

@@ -1,23 +1,72 @@
 @import "tailwindcss";
 
-/* Fonte padrão */
+/*=====================
+  BASE: Fonte e Reset
+=====================*/
 body {
   font-family: Arial, Helvetica, sans-serif;
   margin: 0;
   padding: 0;
 }
 
-/* Variáveis globais */
-:root {
-  --muted-background: #fafafa;
-  --common-background: #ffffff;
-}
+/*================
+  CORES DE FUNDO
+================*/
 
-/* Classes de background */
+/* Fundo neutro usado para áreas suaves */
 .bg-muted {
-  background-color: var(--muted-background);
+  background-color: #fafafa;
 }
 
+/* Fundo branco comum */
 .bg-common {
-  background-color: var(--common-background);
+  background-color: #ffffff;
+}
+
+/* Fundo azul suave ao passar o mouse */
+.bg-hover-primary-soft {
+  transition: background-color 0.2s ease;
+}
+.bg-hover-primary-soft:hover {
+  background-color: #DBEAFE; 
+}
+
+/* Fundo azul claro primário */
+.bg-primary {
+  background-color: #93C5FD; 
+}
+
+/* Fundo azul forte */
+.bg-primary-strong {
+  background-color: #2563EB; 
+}
+
+/* Fundo azul forte no hover */
+.bg-hover-primary-strong {
+  transition: background-color 0.2s ease;
+}
+.bg-hover-primary-strong:hover {
+  background-color: #2563EB; 
+}
+
+/*================
+  CORES DE TEXTO
+================*/
+
+/* Cor principal de marca/texto destacado */
+.color-primary {
+  color: #727cf5;
+}
+
+/* Cor principal no hover */
+.color-hover-primary {
+  transition: color 0.2s ease;
+}
+.color-hover-primary:hover {
+  color: #727cf5; 
+}
+
+/* Cor de itens no menu lateral */
+.color-side-bar-item {
+  color: #c7cbfb;
 }

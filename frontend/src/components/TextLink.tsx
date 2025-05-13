@@ -44,7 +44,7 @@ export default function TextLink({
   }[size]
 
   const variantClass = {
-    primary: 'text-indigo-500 hover:text-indigo-600',
+    primary: 'text-indigo-500 hover:text-indigo-700',
     secondary: 'text-gray-700 hover:text-indigo-500'
   }[variant]
 
