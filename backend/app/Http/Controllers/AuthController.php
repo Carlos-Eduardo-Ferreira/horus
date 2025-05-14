@@ -3,10 +3,13 @@
 namespace App\Http\Controllers;
 
 use App\Models\User;
+use App\Models\Role;
+use App\Models\UserRole;
 use App\Http\Requests\LoginRequest;
 use App\Http\Requests\RegisterRequest;
 use App\Helpers\StringHelper;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Http\Request;
 
 class AuthController extends Controller
@@ -20,17 +23,35 @@ class AuthController extends Controller
     public function register(RegisterRequest $request)
     {
         try {
+            DB::beginTransaction();
+            
             // Valida os dados da requisição
             $fields = $request->validated();
             
             // Remove caracteres não numéricos do documento
             $fields['document'] = StringHelper::onlyNumbers($fields['document']);
             
+            // Remove o type do array para não salvar no usuário
+            $type = $fields['type'];
+            unset($fields['type']);
+            
             // Cria o novo usuário
             $user = User::create($fields);
             
+            // Busca o role baseado no type recebido (consumer ou company)
+            $role = Role::where('identifier', $type)->firstOrFail();
+            
+            // Cria o relacionamento do usuário com o role e a unidade local
+            UserRole::create([
+                'user_id' => $user->id,
+                'role_id' => $role->id,
+                'local_unit_id' => 1 // ID fixo conforme solicitado
+            ]);
+            
             // Gera um token de acesso para o usuário
             $token = $user->createToken($user->document)->plainTextToken;
+
+            DB::commit();
 
             // Retorna o usuário e o token
             return response()->json([
@@ -38,9 +59,11 @@ class AuthController extends Controller
                 'token' => $token
             ]);
             
-        } catch (\Illuminate\Database\QueryException $e) {
+        } catch (\Exception $e) {
+            DB::rollBack();
+            
             // Se for erro de duplicidade
-            if ($e->errorInfo[1] === 1062) {
+            if ($e instanceof \Illuminate\Database\QueryException && $e->errorInfo[1] === 1062) {
                 return response()->json([
                     'message' => 'Erro de validação',
                     'errors' => [

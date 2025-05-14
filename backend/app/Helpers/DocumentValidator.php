@@ -61,20 +61,29 @@ class DocumentValidator
             return false;
         }
 
-        // Calcula os dígitos verificadores
-        for ($t = 12; $t < 14; $t++) {
-            $d = 0;
-            $c = $t - 7;
-            for ($i = $t; $i >= 0; $i--) {
-                $d += $cnpj[$i] * $c;
-                $c = ($c < 3) ? 9 : --$c;
-            }
-            $d = ((10 * $d) % 11) % 10;
-            if ($cnpj[$t + 1] != $d) {
-                return false;
-            }
+        // Calcula primeiro dígito verificador
+        $sum = 0;
+        $weight = 5;
+        
+        for ($i = 0; $i < 12; $i++) {
+            $sum += $cnpj[$i] * $weight;
+            $weight = ($weight == 2) ? 9 : $weight - 1;
         }
-
-        return true;
+        
+        $digit1 = ((11 - ($sum % 11)) > 9) ? 0 : (11 - ($sum % 11));
+        
+        // Calcula segundo dígito verificador
+        $sum = 0;
+        $weight = 6;
+        
+        for ($i = 0; $i < 13; $i++) {
+            $sum += $cnpj[$i] * $weight;
+            $weight = ($weight == 2) ? 9 : $weight - 1;
+        }
+        
+        $digit2 = ((11 - ($sum % 11)) > 9) ? 0 : (11 - ($sum % 11));
+        
+        // Verifica se os dígitos calculados são iguais aos dígitos informados
+        return ($cnpj[12] == $digit1 && $cnpj[13] == $digit2);
     }
 }
