@@ -35,7 +35,7 @@ export default function Title({
         sizeClass,
         'font-bold',
         alignClass,
-        'text-gray-900',
+        'color-title',
         className
       )}
       {...rest}

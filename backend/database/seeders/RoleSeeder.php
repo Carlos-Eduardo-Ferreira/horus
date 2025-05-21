@@ -4,44 +4,46 @@ namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Carbon;
 
 class RoleSeeder extends Seeder
 {
     public function run(): void
     {
+        $now = Carbon::now();
+
         $roles = [
             [
-                'name' => 'Master',
+                'name' => 'MASTER',
                 'identifier' => 'master',
-                'created_at' => now(),
-                'updated_at' => now(),
             ],
             [
-                'name' => 'Administrador',
+                'name' => 'ADMINISTRADOR',
                 'identifier' => 'admin',
-                'created_at' => now(),
-                'updated_at' => now(),
             ],
             [
-                'name' => 'Usuário',
+                'name' => 'USUÁRIO',
                 'identifier' => 'user',
-                'created_at' => now(),
-                'updated_at' => now(),
             ],
             [
-                'name' => 'Consumidor',
+                'name' => 'CONSUMIDOR',
                 'identifier' => 'consumer',
-                'created_at' => now(),
-                'updated_at' => now(),
             ],
             [
-                'name' => 'Empresa',
+                'name' => 'EMPRESA',
                 'identifier' => 'company',
-                'created_at' => now(),
-                'updated_at' => now(),
             ],
         ];
 
-        DB::table('roles')->insert($roles);
+        foreach ($roles as $role) {
+            DB::table('roles')->updateOrInsert(
+                ['identifier' => $role['identifier']],
+                [
+                    'name' => $role['name'],
+                    'updated_at' => $now,
+                    'created_at' => $now,
+                ]
+            );
+        }
     }
 }

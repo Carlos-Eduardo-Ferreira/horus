@@ -17,6 +17,8 @@ export interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElemen
   variant?: ButtonVariant
   outline?: boolean
   href?: string
+  type?: 'button' | 'submit' | 'reset'
+  buttonType?: 'regular' | 'compact'
 }
 
 export default function Button({
@@ -27,13 +29,15 @@ export default function Button({
   href,
   disabled = false,
   type = 'button',
+  buttonType = 'regular',
   onClick,
   ...rest
 }: ButtonProps) {
 
   const base = cn(
-    'inline-flex items-center justify-center px-4 py-2',
-    'border-2 rounded-xl font-medium cursor-pointer',
+    'inline-flex items-center justify-center px-4',
+    buttonType === 'regular' ? 'py-2 rounded-xl' : 'py-0 h-10 rounded-lg',
+    'border-2 font-medium cursor-pointer',
     'transition-colors transform duration-200 ease-in-out',
     'shadow-md hover:-translate-y-[1px]',
     'active:translate-y-0 active:shadow-sm',
@@ -57,7 +61,7 @@ export default function Button({
     danger: 'bg-white text-red-400 border-red-400 hover:bg-red-400 hover:text-white',
     warning: 'bg-white text-yellow-500 border-amber-400 hover:bg-amber-400 hover:text-gray-700',
     info: 'bg-white text-cyan-600 border-cyan-600 hover:bg-cyan-600 hover:text-gray-700',
-    light: 'bg-white text-gray-100 border-gray-100 hover:bg-gray-100 hover:text-gray-700',
+    light: 'bg-white text-gray-500 border-gray-300 hover:bg-gray-100 hover:text-gray-700',
   }
 
   const style = outline ? outlineStyles[variant] : filledStyles[variant]

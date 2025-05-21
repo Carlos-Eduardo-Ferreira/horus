@@ -12,13 +12,15 @@ export default function AuthenticatedLayout({
   return (
     // Estrutura principal com menu lateral, cabeçalho, conteúdo e rodapé
     <div className="flex flex-col md:flex-row h-screen overflow-hidden">
-      <SidebarMenu /> {/* Menu lateral de navegação */}
+      <SidebarMenu />
       <div className="flex flex-1 flex-col min-w-0">
-        <Header /> {/* Cabeçalho da aplicação */}
-        <main className="flex-1 overflow-auto bg-muted">
-          {children} {/* Renderiza os componentes filhos */}
+        <Header />
+        <main className="flex-1 overflow-y-auto bg-muted p-6">
+          <div className="h-full max-h-[calc(100vh-8rem)]">
+            {children}
+          </div>
         </main>
-        <Footer className="sticky bottom-0 w-full" /> {/* Rodapé fixo ao final da página */}
+        <Footer className="sticky bottom-0 w-full" />
       </div>
     </div>
   );

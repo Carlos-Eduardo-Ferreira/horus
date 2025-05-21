@@ -6,11 +6,13 @@ import { cn } from '@/utils/classNames'
 export interface TextProps extends React.HTMLAttributes<HTMLParagraphElement> {
   size?: 'xs' | 'sm' | 'md' | 'lg' | 'xl'
   align?: 'left' | 'center' | 'right'
+  noDefaultColor?: boolean
 }
 
 export default function Text({
   size = 'md',
   align = 'left',
+  noDefaultColor = false,
   className,
   children,
   ...rest
@@ -34,7 +36,7 @@ export default function Text({
       className={cn(
         sizeClass,
         alignClass,
-        'text-gray-900',
+        !noDefaultColor && 'color-text',
         className
       )}
       {...rest}

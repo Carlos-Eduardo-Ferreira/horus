@@ -53,7 +53,15 @@ body {
   CORES DE TEXTO
 ================*/
 
-/* Cor principal de marca/texto destacado */
+.color-text {
+  color: #71717a;
+}
+
+.color-title {
+  color: #09090b;
+}
+
+/* Cor principal */
 .color-primary {
   color: #727cf5;
 }
