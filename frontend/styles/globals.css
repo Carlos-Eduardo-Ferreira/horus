@@ -78,3 +78,32 @@ body {
 .color-side-bar-item {
   color: #c7cbfb;
 }
+
+/*===============================
+  ListTable: Largura Responsiva
+===============================*/
+
+/* 1) Para telas maiores que 1920px:
+   - A largura da tabela é calculada com base em uma porcentagem do viewport (definida pela variável --pct).
+   - Isso garante que a tabela cresça proporcionalmente em telas ultra-largas. */
+.table--freeze {
+  width: calc(100vw * var(--pct));
+}
+
+/* 2) Para telas entre 1056px e 1920px:
+   - A tabela usa um valor fixo de largura em pixels (definido pela variável --freeze).
+   - Isso evita que a tabela fique esticada demais, mantendo uma largura confortável sem scroll horizontal. */
+@media (max-width: 1920px) {
+  .table--freeze {
+    width: var(--freeze);
+  }
+}
+
+/* 3) Para telas menores que 1056px:
+   - A tabela ocupa 100% da largura disponível.
+   - Isso garante que ela se ajuste bem em telas pequenas e não crie scroll horizontal. */
+@media (max-width: 1056px) {
+  .table--freeze {
+    width: 100%;
+  }
+}

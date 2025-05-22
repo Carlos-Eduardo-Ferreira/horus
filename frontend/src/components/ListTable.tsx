@@ -75,15 +75,18 @@ export function ListTable<T extends { id: number }>({
     }
   ];
 
-  const totalPercent = columns.reduce((acc, col) => acc + col.widthPercent, 0);
+  const REF_DESKTOP = 1920;
+  const totalPercent = columns.reduce((s, c) => s + c.widthPercent, 0);
+  const FREEZE_PX = (totalPercent / 100) * REF_DESKTOP;
 
   return (
     <div className="w-full flex justify-center">
       <div
-        style={{
-          width: `${totalPercent}%`,
-          maxWidth: "100%",
-        }}
+        className="table--freeze mx-auto"
+        style={
+          { '--pct': `${totalPercent/100}`,
+            '--freeze': `${FREEZE_PX}px` } as React.CSSProperties
+        }
       >
         <div className="bg-white rounded-xl shadow-2xl">
           {/* Header section */}
