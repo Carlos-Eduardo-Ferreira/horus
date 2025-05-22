@@ -82,7 +82,7 @@ export function ListTable<T extends { id: number }>({
   return (
     <div className="w-full flex justify-center">
       <div
-        className="table--freeze mx-auto"
+        className="table--freeze mx-auto w-full"
         style={
           { '--pct': `${totalPercent/100}`,
             '--freeze': `${FREEZE_PX}px` } as React.CSSProperties
@@ -90,9 +90,9 @@ export function ListTable<T extends { id: number }>({
       >
         <div className="bg-white rounded-xl shadow-2xl">
           {/* Header section */}
-          <div className="p-6 pb-3">
-            <div className="flex items-center justify-between mb-6 flex-shrink-0">
-              <Title size="md" align="left" className="ps-3">
+          <div className="p-4 sm:p-6 pb-3">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-4 sm:mb-6 flex-shrink-0 gap-2">
+              <Title size="md" align="left" className="ps-1 sm:ps-3">
                 {title}
               </Title>
               <div className="flex items-center gap-2">
@@ -121,22 +121,21 @@ export function ListTable<T extends { id: number }>({
           </div>
 
           {/* Table section */}
-          <div className="px-6 pb-3">
-            <div className="border-b-2 border-gray-200">
-              <table className="w-full">
+          <div className="px-2 sm:px-6">
+            <div className="border-b-2 border-gray-200 overflow-x-auto">
+              <table className="w-full min-w-[600px]">
                 <colgroup>
                   {columns.map((col) => (
                     <col key={String(col.key)} style={{ width: `${col.widthPercent}%` }} />
                   ))}
                 </colgroup>
-                
                 {/* Fixed header */}
                 <thead className="bg-white border-b-2 border-gray-200">
                   <tr>
                     {columns.map((col) => (
                       <th
                         key={String(col.key)}
-                        className="px-6 py-3"
+                        className="px-2 sm:px-6 py-2 sm:py-3"
                         style={{ width: `${col.widthPercent}%` }}
                       >
                         <Title size="xs" align={col.align || 'left'}>
@@ -150,8 +149,8 @@ export function ListTable<T extends { id: number }>({
             </div>
 
             {/* Scrollable body - increased max height */}
-            <div className="max-h-[calc(100vh-20rem)] overflow-y-auto">
-              <table className="w-full">
+            <div className="max-h-[calc(100vh-20rem)] overflow-y-auto overflow-x-auto">
+              <table className="w-full min-w-[600px]">
                 <colgroup>
                   {columns.map((col) => (
                     <col key={String(col.key)} style={{ width: `${col.widthPercent}%` }} />
@@ -163,7 +162,7 @@ export function ListTable<T extends { id: number }>({
                       {columns.map((col) => (
                         <td
                           key={String(col.key)}
-                          className="px-6 py-3 whitespace-nowrap"
+                          className="px-2 sm:px-6 py-2 sm:py-3 whitespace-normal break-words"
                           style={{ width: `${col.widthPercent}%` }}
                         >
                           {col.render ? (
