@@ -147,7 +147,7 @@ export default function LoginPage() {
       )}
 
       {/* Formulário de login */}
-      <form onSubmit={handleSubmit}>
+      <form onSubmit={handleSubmit} noValidate>
         <div className="flex flex-col space-y-6">
           {/* Campo de CPF/CNPJ */}
           <LabeledInput

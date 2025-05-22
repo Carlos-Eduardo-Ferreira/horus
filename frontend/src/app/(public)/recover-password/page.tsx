@@ -37,7 +37,7 @@ export default function RecoverPasswordPage() {
         Insira seu e-mail para alteração de senha
       </Text>
 
-      <form onSubmit={handleSubmit} className="flex flex-col space-y-6">
+      <form onSubmit={handleSubmit} className="flex flex-col space-y-6" noValidate>
         <div className="grid gap-6">
           <div>
             <LabeledInput
