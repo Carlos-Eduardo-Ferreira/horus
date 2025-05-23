@@ -90,7 +90,7 @@ const NotificationIcon = () => {
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -10 }}
             transition={{ duration: 0.3 }}
-            className="absolute right-0 mt-4 w-[460px] bg-white shadow-lg rounded-lg overflow-hidden z-20"
+            className="absolute right-0 mt-4 w-[460px] bg-white shadow-lg rounded-lg overflow-hidden z-40"
           >
             <div>
               <Title size="sm" align="left" className="p-3">

@@ -34,7 +34,7 @@ export default function ActionsPage() {
   const router = useRouter();
 
   const columns: ListTableColumn<Action>[] = [
-    { key: "name", label: "Nome", widthPercent: 25, align: 'left' },
+    { key: "name", label: "Nome", widthPercent: 23, align: 'left' },
     { key: "identifier", label: "Identificador", widthPercent: 20, align: 'center' },
   ];
 

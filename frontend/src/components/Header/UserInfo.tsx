@@ -137,7 +137,7 @@ const UserInfo = () => {
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -10 }}
             transition={{ duration: 0.3 }}
-            className="absolute right-0 mt-4 bg-white shadow-lg rounded-lg overflow-hidden z-20"
+            className="absolute right-0 mt-4 bg-white shadow-lg rounded-lg overflow-hidden z-40"
             style={{ width: menuWidth }}
           >
             {links.map((link) => (
@@ -153,6 +153,7 @@ const UserInfo = () => {
 
             <button
               onClick={handleShowLogout}
+              
               className="flex items-center w-full ps-4 py-2 text-md text-gray-700 hover:bg-gray-100 hover:text-primary cursor-pointer gap-2"
             >
               <GoSignOut className="w-4 h-4" />
