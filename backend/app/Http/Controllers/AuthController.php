@@ -72,7 +72,10 @@ class AuthController extends Controller
                 ], 422);
             }
             
-            throw $e;
+            // Retorna uma mensagem genérica para o usuário
+            return response()->json([
+                'message' => 'Não foi possível completar o cadastro. Por favor, tente novamente mais tarde ou entre em contato com o suporte.'
+            ], 500);
         }
     }
 
