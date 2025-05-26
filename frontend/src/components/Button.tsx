@@ -38,7 +38,7 @@ export default function Button({
     'inline-flex items-center justify-center px-4',
     buttonType === 'regular' ? 'py-2 rounded-xl' : 'py-0 h-10 rounded-md',
     'border-2 font-medium cursor-pointer',
-    'transition-colors transform duration-200 ease-in-out',
+    'transition-colors transform duration-200 ease-in-out will-change-transform',
     variant === 'light' ? 'shadow-sm hover:-translate-y-[1px]' : 'shadow-md hover:-translate-y-[1px]',
     'active:translate-y-0 active:shadow-sm',
     disabled && 'opacity-70 cursor-not-allowed'

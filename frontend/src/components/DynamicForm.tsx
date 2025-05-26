@@ -4,6 +4,7 @@ import Button from "./Button";
 import Title from "./Title";
 import { FaSave } from "react-icons/fa";
 import { TbArrowBackUp } from "react-icons/tb";
+import { useRouter } from "next/navigation";
 
 // Tipos suportados pelos campos
 type FieldType = "text" | "number" | "password" | "email";
@@ -30,6 +31,7 @@ export interface DynamicFormProps {
   isNew: boolean;
   recordId?: string | number;
   groups?: DynamicFormField[][];
+  returnPath?: string;
 }
 
 // Função de fallback para agrupar campos respeitando limite de 6 colunas por linha
@@ -90,8 +92,11 @@ export default function DynamicForm({
   submitting,
   isNew,
   recordId,
-  groups
+  groups,
+  returnPath
 }: DynamicFormProps) {
+  const router = useRouter();
+  
   // Organiza os campos em linhas de no máximo 6 colunas cada
   const rows = groups
     ? groupFieldsByGroupsWithLimit(groups)
@@ -104,6 +109,15 @@ export default function DynamicForm({
   const REF_DESKTOP = 1920;
   const totalPercent = (maxCols / 6) * 100;
   const freezePx = (totalPercent / 100) * REF_DESKTOP;
+
+  // Função para lidar com o cancelamento usando App Router
+  const handleCancel = () => {
+    if (returnPath) {
+      router.push(returnPath);
+    } else if (typeof window !== "undefined") {
+      window.history.back();
+    }
+  };
 
   return (
     <div
@@ -173,7 +187,7 @@ export default function DynamicForm({
               variant="light"
               type="button"
               buttonType="compact"
-              onClick={typeof window !== "undefined" ? () => window.history.back() : undefined}
+              onClick={handleCancel}
             >
               <TbArrowBackUp className="mr-1.5" /> Cancelar
             </Button>

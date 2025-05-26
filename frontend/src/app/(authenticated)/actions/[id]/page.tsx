@@ -79,6 +79,7 @@ export default function ActionFormPage() {
       isNew={isNew}
       recordId={id}
       groups={groups}
+      returnPath="/actions"
     />
   );
 }
