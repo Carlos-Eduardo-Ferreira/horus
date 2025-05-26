@@ -83,7 +83,7 @@ export function ListTable<T extends { id: number }>({
   return (
     <div className="w-full flex justify-center">
       <div
-        className="table--freeze mx-auto w-full"
+        className="freeze-width mx-auto w-full"
         style={
           { '--pct': `${totalPercent/100}`,
             '--freeze': `${FREEZE_PX}px` } as React.CSSProperties
@@ -96,7 +96,31 @@ export function ListTable<T extends { id: number }>({
               <Title size="md" align="left" className="ps-1 sm:ps-3 color-primary">
                 {title}
               </Title>
-              <div className="flex items-center gap-2">
+              {/* Versão mobile dos botões - visível apenas em telas pequenas */}
+              <div className="sm:hidden w-full">
+                <div className="form-buttons">
+                  {onFilter && (
+                    <Button
+                      variant="light"
+                      onClick={onFilter}
+                      buttonType="compact"
+                    >
+                      <FiFilter className="mr-1.5" /> Filtrar
+                    </Button>
+                  )}
+                  {onNewClick && (
+                    <Button 
+                      variant="primary"
+                      onClick={onNewClick}
+                      buttonType="compact"
+                    >
+                      <TiPlus className="mr-1.5" /> {buttonText}
+                    </Button>
+                  )}
+                </div>
+              </div>
+              {/* Versão desktop dos botões - só visível em telas médias e maiores */}
+              <div className="hidden sm:flex items-center gap-2">
                 {onFilter && (
                   <Button
                     variant="light"
@@ -121,7 +145,7 @@ export function ListTable<T extends { id: number }>({
 
           {/* Table section */}
           <div className="px-3 sm:ps-6 sm:pe-3">
-            <div className="overflow-auto max-h-[calc(100dvh-17rem)] md:max-h-[calc(100dvh-16rem)]">
+            <div className="overflow-auto max-h-[calc(100dvh-20rem)] md:max-h-[calc(100dvh-16rem)]">
               <table className="w-full min-w-[600px]">
                 <colgroup>
                   {columns.map((col) => (
