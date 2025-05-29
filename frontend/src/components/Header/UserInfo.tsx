@@ -1,4 +1,4 @@
-'use client'
+'use client';
 
 import { ConfirmModal } from "@/components/ConfirmModal";
 import { AnimatePresence, motion } from "framer-motion";
@@ -95,7 +95,7 @@ const UserInfo = () => {
 
   const handleShowLogout = () => {
     setIsMenuOpen(false);
-    setShowLogout(!showLogout);
+    setShowLogout((prev) => !prev);
   };
 
   const handleSignOut = async () => {
@@ -117,7 +117,7 @@ const UserInfo = () => {
       <div
         ref={triggerRef}
         className="flex cursor-pointer"
-        onClick={() => setIsMenuOpen(!isMenuOpen)}
+        onClick={() => setIsMenuOpen((prev) => !prev)}
       >
         {user?.image ? (
           <div className="w-[42px] h-[42px] rounded-full overflow-hidden mr-2 md:mr-4">

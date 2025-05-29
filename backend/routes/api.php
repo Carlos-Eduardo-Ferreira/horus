@@ -10,8 +10,8 @@ Route::post('/register', [App\Http\Controllers\AuthController::class, 'register'
 
 // Rotas protegidas
 Route::middleware('auth:sanctum')->group(function () {
-    Route::post('/logout', [App\Http\Controllers\AuthController::class, 'logout']);
     Route::get('/me', function (Request $request) {
         return new UserResource($request->user());
     });
+    Route::post('/logout', [\App\Http\Controllers\AuthController::class, 'logout']);
 });
