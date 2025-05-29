@@ -32,6 +32,8 @@ export interface DynamicFormProps {
   recordId?: string | number;
   groups?: DynamicFormField[][];
   returnPath?: string;
+  fieldErrors?: { [key: string]: string };
+  hasSubmitted?: boolean;
 }
 
 // Função de fallback para agrupar campos respeitando limite de 6 colunas por linha
@@ -93,7 +95,9 @@ export default function DynamicForm({
   isNew,
   recordId,
   groups,
-  returnPath
+  returnPath,
+  fieldErrors = {},
+  hasSubmitted = false,
 }: DynamicFormProps) {
   const router = useRouter();
   
@@ -172,7 +176,16 @@ export default function DynamicForm({
                           disabled={field.disabled}
                           error={field.error}
                           name={field.name}
+                          className={`w-full px-3 py-2 border rounded
+                            ${hasSubmitted && fieldErrors[field.name] ? "border-red-500 focus:border-red-500 focus:ring-1 focus:ring-red-500" : "border-gray-300 focus:border-gray-600 focus:ring-1 focus:ring-gray-600"}
+                            ${submitting ? "bg-gray-100" : ""}
+                          `}
                         />
+                        {hasSubmitted && fieldErrors[field.name] && (
+                          <div className="text-red-500 text-xs mt-1">
+                            {fieldErrors[field.name]}
+                          </div>
+                        )}
                       </div>
                     );
                   })}

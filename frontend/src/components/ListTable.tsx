@@ -1,4 +1,4 @@
-import React, { ReactNode } from "react";
+import React, { ReactNode, useState, useRef, useEffect, useCallback } from "react";
 import Title from "@/components/Title";
 import Text from "@/components/Text";
 import Button from "@/components/Button";
@@ -11,6 +11,8 @@ import Alert from '@/components/Alert';
 import { FaInfoCircle } from "react-icons/fa";
 import { Tooltip } from "@/components/Tooltip";
 import { FiFilter } from "react-icons/fi";
+import { ConfirmModal } from "@/components/ConfirmModal";
+import { ExclamationTriangleIcon } from "@heroicons/react/24/outline";
 
 export type ListTableColumn<T> = {
   key: keyof T;
@@ -28,9 +30,16 @@ export type ListTableProps<T> = {
   onNewClick?: () => void;
   basePath: string;
   customActions?: (row: T) => React.ReactNode;
-  onDelete?: (id: number) => void;
+  onDelete?: (id: number) => Promise<void> | void;
   actionsColumnWidth?: number;
   onFilter?: () => void;
+  deleteModalTitle?: string;
+  deleteModalDescription?: string;
+  deleteModalConfirmText?: string;
+  deleteModalCancelText?: string;
+  onLoadMore?: () => void;
+  isLoadingMore?: boolean;
+  hasMoreData?: boolean;
 };
 
 export function ListTable<T extends { id: number }>({
@@ -44,9 +53,47 @@ export function ListTable<T extends { id: number }>({
   onDelete,
   actionsColumnWidth = 0,
   onFilter,
+  deleteModalTitle = "Deseja realmente excluir?",
+  deleteModalDescription = "Esta ação não poderá ser desfeita.",
+  deleteModalConfirmText = "Excluir",
+  deleteModalCancelText = "Cancelar",
+  onLoadMore,
+  isLoadingMore = false,
+  hasMoreData = false,
 }: ListTableProps<T>) {
   const router = useRouter();
-  
+
+  // Estado para controlar o modal de confirmação de exclusão
+  const [deleteId, setDeleteId] = useState<number | null>(null);
+  const [confirmLoading, setConfirmLoading] = useState(false);
+  const tableContainerRef = useRef<HTMLDivElement>(null);
+  const [hasVerticalScrollbar, setHasVerticalScrollbar] = useState(false);
+
+  useEffect(() => {
+    const checkScrollbar = () => {
+      const el = tableContainerRef.current;
+      if (el) {
+        // Considera scrollbar se scrollHeight > clientHeight (vertical)
+        setHasVerticalScrollbar(el.scrollHeight > el.clientHeight);
+      }
+    };
+    checkScrollbar();
+    window.addEventListener("resize", checkScrollbar);
+    return () => window.removeEventListener("resize", checkScrollbar);
+  }, [data]);
+
+  const handleDelete = (id: number) => {
+    setDeleteId(id);
+  };
+
+  const handleConfirmDelete = async () => {
+    if (deleteId == null || !onDelete) return;
+    setConfirmLoading(true);
+    await onDelete(deleteId);
+    setConfirmLoading(false);
+    setDeleteId(null);
+  };
+
   const columns = [
     ...userColumns,
     {
@@ -67,7 +114,7 @@ export function ListTable<T extends { id: number }>({
             <ActionButton
               icon={AiOutlineDelete as React.ForwardRefExoticComponent<React.ComponentProps<'svg'>>}
               color="danger"
-              onClick={() => onDelete?.(row.id)}
+              onClick={() => handleDelete(row.id)}
             />
           </Tooltip>
           {customActions?.(row)}
@@ -80,6 +127,29 @@ export function ListTable<T extends { id: number }>({
   const totalPercent = columns.reduce((s, c) => s + c.widthPercent, 0);
   const FREEZE_PX = (totalPercent / 100) * REF_DESKTOP;
 
+  // Função para manipular eventos de rolagem
+  const handleScroll = useCallback(() => {
+    const el = tableContainerRef.current;
+    if (!el || !onLoadMore || isLoadingMore || !hasMoreData) return;
+    
+    // Se o usuário rolar até 200px da parte inferior, carregue mais dados
+    const scrollPosition = el.scrollTop + el.clientHeight;
+    const scrollThreshold = el.scrollHeight - 200;
+    
+    if (scrollPosition >= scrollThreshold) {
+      onLoadMore();
+    }
+  }, [onLoadMore, isLoadingMore, hasMoreData]);
+
+  // Adicionar ouvinte de evento de rolagem
+  useEffect(() => {
+    const el = tableContainerRef.current;
+    if (el && onLoadMore) {
+      el.addEventListener('scroll', handleScroll);
+      return () => el.removeEventListener('scroll', handleScroll);
+    }
+  }, [handleScroll, onLoadMore]);
+
   return (
     <div className="w-full flex justify-center">
       <div
@@ -89,7 +159,10 @@ export function ListTable<T extends { id: number }>({
             '--freeze': `${FREEZE_PX}px` } as React.CSSProperties
         }
       >
-        <div className="bg-white rounded-xl shadow-lg">
+        <div className={
+          `bg-white rounded-xl shadow-lg` +
+          (!hasVerticalScrollbar ? " pb-6 pr-3" : "")
+        }>
           {/* Header section */}
           <div className="p-4 sm:p-6 pb-3">
             <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-2 sm:mb-1 flex-shrink-0 gap-2">
@@ -145,7 +218,10 @@ export function ListTable<T extends { id: number }>({
 
           {/* Table section */}
           <div className="px-3 sm:ps-6 sm:pe-3">
-            <div className="overflow-auto max-h-[calc(100dvh-20rem)] md:max-h-[calc(100dvh-16rem)]">
+            <div
+              ref={tableContainerRef}
+              className="overflow-auto max-h-[calc(100dvh-20rem)] md:max-h-[calc(100dvh-17rem)]"
+            >
               <table className="w-full min-w-[600px]">
                 <colgroup>
                   {columns.map((col) => (
@@ -195,12 +271,33 @@ export function ListTable<T extends { id: number }>({
                       </td>
                     </tr>
                   )}
+                  {isLoadingMore && (
+                    <tr>
+                      <td colSpan={columns.length} className="py-3 text-center">
+                        <div className="flex justify-center items-center py-4">
+                          <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-primary"></div>
+                        </div>
+                      </td>
+                    </tr>
+                  )}
                 </tbody>
               </table>
             </div>
           </div>
         </div>
       </div>
+      {/* Modal de confirmação de exclusão */}
+      <ConfirmModal
+        show={deleteId !== null}
+        onClose={() => setDeleteId(null)}
+        onOk={handleConfirmDelete}
+        confirmLoading={confirmLoading}
+        title={deleteModalTitle}
+        description={deleteModalDescription}
+        confirmText={deleteModalConfirmText}
+        cancelText={deleteModalCancelText}
+        icon={<ExclamationTriangleIcon className="w-20 h-20 text-red-500" />}
+      />
     </div>
   );
 }
