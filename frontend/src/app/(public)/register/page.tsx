@@ -4,7 +4,7 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { Loader2 } from 'lucide-react'
 import axios from 'axios'
-import { maskCpfCnpj } from '@/utils/maskCpfCnpj'
+import { formatField } from '@/utils/fieldFormatters'
 import { authService } from '@/services/auth'
 import { validateRegisterForm } from '@/validators/registerValidator'
 import LabeledInput from '@/components/LabeledInput'
@@ -57,9 +57,11 @@ export default function RegisterPage() {
   };
 
   const handleDocumentChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const maskedValue = maskCpfCnpj(e.target.value, userType === 'consumer' ? 'cpf' : 'cnpj');
+    // Aplica o formatador de acordo com o tipo de usuário
+    const formatterType = userType === 'consumer' ? 'cpf' : 'cnpj';
+    const formattedValue = formatField(formatterType, e.target.value);
     
-    const updated = { ...form, document: maskedValue };
+    const updated = { ...form, document: formattedValue };
     setForm(updated);
     
     // Se já tentou enviar, revalida o campo conforme digita

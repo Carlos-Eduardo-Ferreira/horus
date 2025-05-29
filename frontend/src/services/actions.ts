@@ -16,11 +16,25 @@ export interface PaginatedResponse<T> {
   }
 }
 
+export interface FilterParams {
+  [key: string]: string | number | null;
+}
+
 export const actionsService = {
-  async list(token: string, page: number = 1): Promise<PaginatedResponse<Action>> {
+  async list(token: string, page: number = 1, filters: FilterParams = {}): Promise<PaginatedResponse<Action>> {
+    const validFilters = Object.entries(filters).reduce((acc, [key, value]) => {
+      if (value !== null && value !== undefined && value !== '') {
+        acc[key] = value;
+      }
+      return acc;
+    }, {} as FilterParams);
+    
     const { data } = await axios.get<PaginatedResponse<Action>>('/api/actions', {
       headers: { Authorization: `Bearer ${token}` },
-      params: { page }
+      params: { 
+        page,
+        ...validFilters
+      }
     });
     return data;
   },

@@ -5,17 +5,32 @@ namespace App\Http\Controllers;
 use App\Models\Action;
 use App\Http\Resources\ActionResource;
 use App\Http\Requests\ActionRequest;
+use Illuminate\Http\Request;
 
 class ActionController extends Controller
 {
     /**
      * Lista todas as actions paginadas e ordenadas por nome.
      *
+     * @param Request $request
      * @return \Illuminate\Http\Resources\Json\AnonymousResourceCollection
      */
-    public function index()
+    public function index(Request $request)
     {
-        $actions = Action::orderBy('name', 'asc')->paginate(100);
+        $query = Action::query();
+        
+        // Aplicar filtros se existirem
+        if ($request->has('name') && $request->name) {
+            $query->where('name', 'like', '%' . $request->name . '%');
+        }
+        
+        if ($request->has('identifier') && $request->identifier) {
+            $query->where('identifier', 'like', '%' . $request->identifier . '%');
+        }
+        
+        // Ordenar e paginar
+        $actions = $query->orderBy('name', 'asc')->paginate(100);
+        
         return ActionResource::collection($actions);
     }
 

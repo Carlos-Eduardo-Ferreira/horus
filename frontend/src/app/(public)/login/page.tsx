@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import axios from 'axios';
 import { Loader2 } from 'lucide-react';
-import { maskCpfCnpj } from '@/utils/maskCpfCnpj';
+import { formatField } from '@/utils/fieldFormatters';
 import { authService } from '@/services/auth';
 import { validateLoginForm } from '@/validators/loginValidator';
 import LabeledInput from '@/components/LabeledInput';
@@ -38,7 +38,7 @@ export default function LoginPage() {
   const onChangeField = (field: 'document' | 'password', value: string) => {
     const updated = {
       ...form,
-      [field]: field === 'document' ? maskCpfCnpj(value) : value // Aplica máscara se for documento
+      [field]: field === 'document' ? formatField('cpfcnpj', value) : value // Aplica formatador se for documento
     };
     setForm(updated);
     setGlobalError('');

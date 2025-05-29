@@ -13,6 +13,7 @@ import { Tooltip } from "@/components/Tooltip";
 import { FiFilter } from "react-icons/fi";
 import { ConfirmModal } from "@/components/ConfirmModal";
 import { ExclamationTriangleIcon } from "@heroicons/react/24/outline";
+import { FilterModal, FilterField, FilterValues } from "@/components/FilterModal";
 
 export type ListTableColumn<T> = {
   key: keyof T;
@@ -32,7 +33,7 @@ export type ListTableProps<T> = {
   customActions?: (row: T) => React.ReactNode;
   onDelete?: (id: number) => Promise<void> | void;
   actionsColumnWidth?: number;
-  onFilter?: () => void;
+  onFilter?: (filters: FilterValues) => void;
   deleteModalTitle?: string;
   deleteModalDescription?: string;
   deleteModalConfirmText?: string;
@@ -40,6 +41,8 @@ export type ListTableProps<T> = {
   onLoadMore?: () => void;
   isLoadingMore?: boolean;
   hasMoreData?: boolean;
+  filterFields?: FilterField[];
+  initialFilterValues?: FilterValues;
 };
 
 export function ListTable<T extends { id: number }>({
@@ -60,6 +63,8 @@ export function ListTable<T extends { id: number }>({
   onLoadMore,
   isLoadingMore = false,
   hasMoreData = false,
+  filterFields = [],
+  initialFilterValues = {},
 }: ListTableProps<T>) {
   const router = useRouter();
 
@@ -68,6 +73,24 @@ export function ListTable<T extends { id: number }>({
   const [confirmLoading, setConfirmLoading] = useState(false);
   const tableContainerRef = useRef<HTMLDivElement>(null);
   const [hasVerticalScrollbar, setHasVerticalScrollbar] = useState(false);
+  
+  // Estado para controlar o modal de filtro
+  const [showFilterModal, setShowFilterModal] = useState(false);
+  const [filterValues, setFilterValues] = useState<FilterValues>(initialFilterValues);
+  const [activeFiltersCount, setActiveFiltersCount] = useState(0);
+
+  // Effect para contar filtros ativos
+  useEffect(() => {
+    const count = Object.values(filterValues).filter(value => 
+      value !== null && value !== '' && value !== undefined
+    ).length;
+    setActiveFiltersCount(count);
+  }, [filterValues]);
+
+  // Effect para atualizar filtros quando valores iniciais mudam
+  useEffect(() => {
+    setFilterValues(initialFilterValues);
+  }, [initialFilterValues]);
 
   useEffect(() => {
     const checkScrollbar = () => {
@@ -93,6 +116,51 @@ export function ListTable<T extends { id: number }>({
     setConfirmLoading(false);
     setDeleteId(null);
   };
+
+  // Funções para lidar com o filtro
+  const handleOpenFilterModal = () => {
+    setShowFilterModal(true);
+  };
+
+  const handleApplyFilter = (values: FilterValues) => {
+    setFilterValues(values);
+    setShowFilterModal(false);
+    if (onFilter) {
+      onFilter(values);
+    }
+  };
+
+  const handleClearFilter = () => {
+    const emptyFilters = {} as FilterValues;
+    setFilterValues(emptyFilters);
+    setShowFilterModal(false);
+    if (onFilter) {
+      onFilter(emptyFilters);
+    }
+  };
+
+  // Função para manipular eventos de rolagem
+  const handleScroll = useCallback(() => {
+    const el = tableContainerRef.current;
+    if (!el || !onLoadMore || isLoadingMore || !hasMoreData) return;
+    
+    // Se o usuário rolar até 200px da parte inferior, carregue mais dados
+    const scrollPosition = el.scrollTop + el.clientHeight;
+    const scrollThreshold = el.scrollHeight - 200;
+    
+    if (scrollPosition >= scrollThreshold) {
+      onLoadMore();
+    }
+  }, [onLoadMore, isLoadingMore, hasMoreData]);
+
+  // Adicionar ouvinte de evento de rolagem
+  useEffect(() => {
+    const el = tableContainerRef.current;
+    if (el && onLoadMore) {
+      el.addEventListener('scroll', handleScroll);
+      return () => el.removeEventListener('scroll', handleScroll);
+    }
+  }, [handleScroll, onLoadMore]);
 
   const columns = [
     ...userColumns,
@@ -127,29 +195,6 @@ export function ListTable<T extends { id: number }>({
   const totalPercent = columns.reduce((s, c) => s + c.widthPercent, 0);
   const FREEZE_PX = (totalPercent / 100) * REF_DESKTOP;
 
-  // Função para manipular eventos de rolagem
-  const handleScroll = useCallback(() => {
-    const el = tableContainerRef.current;
-    if (!el || !onLoadMore || isLoadingMore || !hasMoreData) return;
-    
-    // Se o usuário rolar até 200px da parte inferior, carregue mais dados
-    const scrollPosition = el.scrollTop + el.clientHeight;
-    const scrollThreshold = el.scrollHeight - 200;
-    
-    if (scrollPosition >= scrollThreshold) {
-      onLoadMore();
-    }
-  }, [onLoadMore, isLoadingMore, hasMoreData]);
-
-  // Adicionar ouvinte de evento de rolagem
-  useEffect(() => {
-    const el = tableContainerRef.current;
-    if (el && onLoadMore) {
-      el.addEventListener('scroll', handleScroll);
-      return () => el.removeEventListener('scroll', handleScroll);
-    }
-  }, [handleScroll, onLoadMore]);
-
   return (
     <div className="w-full flex justify-center">
       <div
@@ -172,13 +217,19 @@ export function ListTable<T extends { id: number }>({
               {/* Versão mobile dos botões - visível apenas em telas pequenas */}
               <div className="sm:hidden w-full">
                 <div className="form-buttons">
-                  {onFilter && (
+                  {filterFields.length > 0 && (
                     <Button
                       variant="light"
-                      onClick={onFilter}
+                      onClick={handleOpenFilterModal}
                       buttonType="compact"
+                      className="relative"
                     >
                       <FiFilter className="mr-1.5" /> Filtrar
+                      {activeFiltersCount > 0 && (
+                        <span className="absolute -top-1.5 -right-1.5 bg-indigo-500 text-white text-xs w-5 h-5 flex items-center justify-center rounded-full">
+                          {activeFiltersCount}
+                        </span>
+                      )}
                     </Button>
                   )}
                   {onNewClick && (
@@ -194,13 +245,19 @@ export function ListTable<T extends { id: number }>({
               </div>
               {/* Versão desktop dos botões - só visível em telas médias e maiores */}
               <div className="hidden sm:flex items-center gap-2">
-                {onFilter && (
+                {filterFields.length > 0 && (
                   <Button
                     variant="light"
-                    onClick={onFilter}
+                    onClick={handleOpenFilterModal}
                     buttonType="compact"
+                    className="relative"
                   >
                     <FiFilter className="mr-1.5" /> Filtrar
+                    {activeFiltersCount > 0 && (
+                      <span className="absolute -top-1.5 -right-1.5 bg-indigo-500 text-white text-xs w-5 h-5 flex items-center justify-center rounded-full">
+                        {activeFiltersCount}
+                      </span>
+                    )}
                   </Button>
                 )}
                 {onNewClick && (
@@ -264,7 +321,7 @@ export function ListTable<T extends { id: number }>({
                   ))}
                   {data.length === 0 && (
                     <tr>
-                      <td colSpan={columns.length} className="py-3">
+                      <td colSpan={columns.length} className="pt-3">
                         <Alert icon={FaInfoCircle} variant="primary">
                           Nenhum registro encontrado.
                         </Alert>
@@ -286,6 +343,7 @@ export function ListTable<T extends { id: number }>({
           </div>
         </div>
       </div>
+      
       {/* Modal de confirmação de exclusão */}
       <ConfirmModal
         show={deleteId !== null}
@@ -297,6 +355,16 @@ export function ListTable<T extends { id: number }>({
         confirmText={deleteModalConfirmText}
         cancelText={deleteModalCancelText}
         icon={<ExclamationTriangleIcon className="w-20 h-20 text-red-500" />}
+      />
+      
+      {/* Modal de filtro */}
+      <FilterModal
+        show={showFilterModal}
+        onClose={() => setShowFilterModal(false)}
+        onApply={handleApplyFilter}
+        onClear={handleClearFilter}
+        fields={filterFields}
+        currentValues={filterValues}
       />
     </div>
   );

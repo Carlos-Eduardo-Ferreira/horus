@@ -6,6 +6,7 @@ import DynamicForm, { DynamicFormField } from "@/components/DynamicForm";
 import { actionsService } from "@/services/actions";
 import { validateActionForm } from "@/validators/actionValidator";
 import axios from "axios";
+import { formatField } from "@/utils/fieldFormatters";
 
 export default function ActionFormPage() {
   const params = useParams() as Record<string, string> | null;
@@ -45,32 +46,32 @@ export default function ActionFormPage() {
   const [fieldErrors, setFieldErrors] = useState<{ [key: string]: string }>({});
   const [hasSubmitted, setHasSubmitted] = useState(false);
 
-  // Modifica o valor conforme as regras
+  // Modifica o valor conforme as regras usando os formatadores básicos
   const handleChange = (name: string, value: string | number) => {
+    // Aplica formatações específicas de acordo com o campo
+    let formattedValue = value;
+    
+    if (name === "name") {
+      formattedValue = formatField('uppercase', value);
+    } else if (name === "identifier") {
+      formattedValue = formatField('identifier', value);
+    }
+    
     setGroups(groups =>
       groups.map(row =>
         row.map(f => {
           if (f.name === name) {
-            let newValue = value;
-            if (name === "name" && typeof value === "string") {
-              newValue = value.toUpperCase(); // Converte o nome para letras maiúsculas
-            }
-            if (name === "identifier" && typeof value === "string") {
-              // Apenas letras, números e _, sem espaços, tudo lowercase
-              newValue = value
-                .replace(/[^a-zA-Z_]/g, "") // remove tudo que não for letra ou _
-                .toLowerCase();
-            }
-            return { ...f, value: newValue };
+            return { ...f, value: formattedValue };
           }
           return f;
         })
       )
     );
+    
     // Se já tentou enviar, revalida o campo conforme digita
     if (hasSubmitted) {
       const allFields = groups.flat().map(f =>
-        f.name === name ? { ...f, value } : f
+        f.name === name ? { ...f, value: formattedValue } : f
       );
       setFieldErrors(validateActionForm(allFields));
     }
