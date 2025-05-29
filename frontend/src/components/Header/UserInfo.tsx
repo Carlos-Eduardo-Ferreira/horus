@@ -2,16 +2,17 @@
 
 import { ConfirmModal } from "@/components/ConfirmModal";
 import { AnimatePresence, motion } from "framer-motion";
-import { getSession, signOut } from "next-auth/react";
 import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import { GoSignOut, GoPerson, GoQuestion } from "react-icons/go";
 import { ExclamationTriangleIcon } from '@heroicons/react/24/outline';
+import { authService } from "@/services/auth";
+import { getRoleLabel } from "../../utils/roleLabels";
 
 interface IUser {
   name: string;
-  role?: string;
+  role: string;
   email: string;
   image?: string;
 }
@@ -39,27 +40,32 @@ const links: ILink[] = [
 ];
 
 const UserInfo = () => {
-  const [user, setUser] = useState<IUser>({} as IUser);
+  const [user, setUser] = useState<IUser>({ name: '', email: '', role: '' });
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
   const triggerRef = useRef<HTMLDivElement>(null);
   const [menuWidth, setMenuWidth] = useState<number>(260);
   const [showLogout, setShowLogout] = useState(false);
 
-  const handleGetSession = async () => {
-    const session = await getSession();
-
-    if (!session) {
-      setTimeout(() => {
-        signOut({ callbackUrl: "/" });
-      }, 2000);
-    }
-
-    setUser(session?.user as IUser);
-  };
-
   useEffect(() => {
-    handleGetSession();
+    const fetchUser = async () => {
+      const token = localStorage.getItem('token');
+      if (!token) {
+        setUser({ name: '', email: '', role: '' });
+        return;
+      }
+      try {
+        const userData = await authService.getCurrentUser(token);
+        if (userData && typeof userData === 'object' && 'user' in userData) {
+          setUser(userData.user as IUser);
+        } else {
+          setUser({ name: '', email: '', role: '' });
+        }
+      } catch {
+        setUser({ name: '', email: '', role: '' });
+      }
+    };
+    fetchUser();
   }, []);
 
   useEffect(() => {
@@ -92,19 +98,18 @@ const UserInfo = () => {
     setShowLogout(!showLogout);
   };
 
-  const handleSignOut = () => {
-    signOut({ callbackUrl: "/" });
-  };
-
-  const UserRoleFormatted = (user?: IUser) => {
-    switch (user?.role) {
-      case "u":
-        return "User";
-      case "m":
-        return "Master";
-      default:
-        return "Cargo";
+  const handleSignOut = async () => {
+    const token = localStorage.getItem('token');
+    if (token) {
+      try {
+        await authService.logout(token);
+      } catch {
+        // ignore
+      }
     }
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
+    window.location.href = '/login';
   };
 
   return (
@@ -124,8 +129,8 @@ const UserInfo = () => {
           </div>
         )}
         <div className="flex flex-col mr-2 md:mr-8">
-          <span className="text-md font-bold">{user?.name ?? "Usuário"}</span>
-          <span className="text-sm">{UserRoleFormatted(user)}</span>
+          <span className="text-md font-bold">{user?.name || "Usuário"}</span>
+          <span className="text-sm">{getRoleLabel(user.role)}</span>
         </div>
       </div>
 
@@ -153,7 +158,6 @@ const UserInfo = () => {
 
             <button
               onClick={handleShowLogout}
-              
               className="flex items-center w-full ps-4 py-2 text-md text-gray-700 hover:bg-gray-100 hover:text-primary cursor-pointer gap-2"
             >
               <GoSignOut className="w-4 h-4" />

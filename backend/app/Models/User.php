@@ -21,7 +21,6 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
-        'type',
         'document',
     ];
 
@@ -49,5 +48,10 @@ class User extends Authenticatable
             // Indica que o 'password' deve ser automaticamente criptografado
             'password' => 'hashed',
         ];
+    }
+
+    public function roles()
+    {
+        return $this->belongsToMany(Role::class, 'user_roles');
     }
 }

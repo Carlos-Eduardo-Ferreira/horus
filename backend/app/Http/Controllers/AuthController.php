@@ -11,6 +11,7 @@ use App\Helpers\StringHelper;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Http\Request;
+use App\Http\Resources\UserResource;
 
 class AuthController extends Controller
 {
@@ -53,9 +54,9 @@ class AuthController extends Controller
 
             DB::commit();
 
-            // Retorna o usuário e o token
+            // Use UserResource para serializar o usuário
             return response()->json([
-                'user' => $user,
+                'user' => new UserResource($user),
                 'token' => $token
             ]);
             
@@ -100,9 +101,9 @@ class AuthController extends Controller
         // Gera um novo token para o usuário
         $token = $user->createToken($user->document)->plainTextToken;
 
-        // Retorna o usuário e o token
+        // Use UserResource para serializar o usuário
         return response()->json([
-            'user' => $user,
+            'user' => new UserResource($user),
             'token' => $token
         ]);
     }
@@ -115,10 +116,9 @@ class AuthController extends Controller
      */
     public function logout(Request $request)
     {
-        // Revoga todos os tokens do usuário
-        $request->user()->tokens()->delete();
+        // Revoga apenas o token atual
+        $request->user()->currentAccessToken()->delete();
 
-        // Retorna mensagem de sucesso
         return response()->json([
             'message' => 'Logout realizado com sucesso'
         ]);

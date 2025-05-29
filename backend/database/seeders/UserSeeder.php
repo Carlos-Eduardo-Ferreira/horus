@@ -13,17 +13,12 @@ class UserSeeder extends Seeder
     {
         $now = Carbon::now();
 
-        // Busca os ids dos roles
-        $roles = DB::table('roles')->pluck('id', 'identifier');
-        // Usa o id 1 para a local unit
-        $localUnitId = 1;
-
         $users = [
             [
                 'name' => 'Master User',
                 'email' => 'user@master.com',
                 'password' => Hash::make('vacapreta123'),
-                'document' => '00000000001',
+                'document' => '39690679015',
                 'created_at' => $now,
                 'updated_at' => $now,
                 'role_identifier' => 'master',
@@ -32,7 +27,7 @@ class UserSeeder extends Seeder
                 'name' => 'Consumer User',
                 'email' => 'user@consumer.com',
                 'password' => Hash::make('vacapreta123'),
-                'document' => '00000000003',
+                'document' => '04097357018',
                 'created_at' => $now,
                 'updated_at' => $now,
                 'role_identifier' => 'consumer',
@@ -41,12 +36,18 @@ class UserSeeder extends Seeder
                 'name' => 'Company User',
                 'email' => 'user@company.com',
                 'password' => Hash::make('vacapreta123'),
-                'document' => '00000000000004',
+                'document' => '18366615000100',
                 'created_at' => $now,
                 'updated_at' => $now,
                 'role_identifier' => 'company',
             ],
         ];
+
+        // Busca os ids dos roles
+        $roles = DB::table('roles')->pluck('id', 'identifier');
+        
+        // Usa o id 1 para a local unit
+        $localUnitId = 1;
 
         foreach ($users as $user) {
             // Cria ou atualiza usuário
