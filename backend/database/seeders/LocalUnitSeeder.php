@@ -4,6 +4,7 @@ namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Carbon;
 
 class LocalUnitSeeder extends Seeder
 {
@@ -13,15 +14,18 @@ class LocalUnitSeeder extends Seeder
             ['id' => 1],
             [
                 'name' => 'Unidade Central',
-                'identifier' => 'central-001',
+                'identifier' => 'central',
                 'email' => 'contato@exemplo.com',
-                'address' => 'Rua Exemplo, 123',
+                'street' => 'Rua Exemplo',
+                'number' => '123',
+                'complement' => 'Bloco A',
+                'neighborhood' => 'Centro',
                 'city' => 'Cidade X',
                 'state' => 'SP',
                 'zip_code' => '12345678',
                 'phone' => '1199999999',
-                'created_at' => now(),
-                'updated_at' => now(),
+                'created_at' => Carbon::now(),
+                'updated_at' => Carbon::now(),
             ]
         );
     }

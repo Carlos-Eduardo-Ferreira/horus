@@ -9,84 +9,46 @@ use Illuminate\Http\Request;
 
 class ActionController extends Controller
 {
-    /**
-     * Lista todas as actions paginadas e ordenadas por nome.
-     *
-     * @param Request $request
-     * @return \Illuminate\Http\Resources\Json\AnonymousResourceCollection
-     */
     public function index(Request $request)
     {
         $query = Action::query();
-        
-        // Aplicar filtros se existirem
-        if ($request->has('name') && $request->name) {
+
+        if ($request->name) {
             $query->where('name', 'like', '%' . $request->name . '%');
         }
-        
-        if ($request->has('identifier') && $request->identifier) {
+
+        if ($request->identifier) {
             $query->where('identifier', 'like', '%' . $request->identifier . '%');
         }
-        
-        // Aplicar ordenação se os parâmetros forem fornecidos
-        if ($request->has('sort_by') && $request->has('sort_order')) {
-            $sortBy = $request->sort_by;
-            $sortOrder = $request->sort_order === 'desc' ? 'desc' : 'asc';
-            
-            // Apenas permite ordenar por colunas válidas na tabela
-            if (in_array($sortBy, ['name', 'identifier', 'id'])) {
-                $query->orderBy($sortBy, $sortOrder);
-            } else {
-                // Ordenação padrão
-                $query->orderBy('name', 'asc');
-            }
-        } else {
-            // Ordenação padrão quando não há parâmetros de ordenação
-            $query->orderBy('name', 'asc');
+
+        $sortBy = $request->get('sort_by', 'name');
+        $sortOrder = $request->get('sort_order', 'asc');
+
+        if (!in_array($sortBy, ['name', 'identifier', 'id'])) {
+            $sortBy = 'name';
         }
-        
-        $actions = $query->paginate(50);
-        
-        return ActionResource::collection($actions);
+
+        $query->orderBy($sortBy, $sortOrder === 'desc' ? 'desc' : 'asc');
+
+        return ActionResource::collection($query->paginate(50));
     }
 
-    /**
-     * Exibe uma action específica.
-     *
-     * @param Action $action
-     * @return ActionResource
-     */
     public function show(Action $action)
     {
         return new ActionResource($action);
     }
 
-    /**
-     * Cria ou atualiza uma action baseado na presença de um modelo Action.
-     *
-     * @param ActionRequest $request
-     * @param Action|null $action
-     * @return ActionResource
-     */
     public function storeOrUpdate(ActionRequest $request, ?Action $action = null)
     {
-        $validated = $request->validated();
+        $data = $request->validated();
 
-        if ($action) {
-            $action->update($validated);
-        } else {
-            $action = Action::create($validated);
-        }
+        $action = $action
+            ? tap($action)->update($data)
+            : Action::create($data);
 
         return new ActionResource($action);
     }
 
-    /**
-     * Remove uma action.
-     *
-     * @param Action $action
-     * @return \Illuminate\Http\JsonResponse
-     */
     public function destroy(Action $action)
     {
         $action->delete();

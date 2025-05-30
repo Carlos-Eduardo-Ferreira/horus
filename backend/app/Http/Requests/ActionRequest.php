@@ -7,69 +7,44 @@ use Illuminate\Validation\Rule;
 
 class ActionRequest extends FormRequest
 {
-    /**
-     * Autoriza o envio da requisição.
-     *
-     * @return bool
-     */
-    public function authorize()
+    public function authorize(): bool
     {
         return true;
     }
 
-    /**
-     * Prepara os dados para validação.
-     *
-     * @return void
-     */
-    protected function prepareForValidation()
+    protected function prepareForValidation(): void
     {
-        if ($this->has('name')) {
-            $this->merge([
-                'name' => strtoupper($this->name),
-            ]);
+        if ($this->filled('name')) {
+            $this->merge(['name' => strtoupper($this->name)]);
         }
-        if ($this->has('identifier')) {
-            $identifier = strtolower($this->identifier);
-            $identifier = preg_replace('/[^a-z_]/', '', $identifier);
-            $this->merge([
-                'identifier' => $identifier,
-            ]);
+
+        if ($this->filled('identifier')) {
+            $identifier = preg_replace('/[^a-z_]/', '', strtolower($this->identifier));
+            $this->merge(['identifier' => $identifier]);
         }
     }
 
-    /**
-     * Define as regras de validação para a requisição.
-     *
-     * @return array
-     */
-    public function rules()
+    public function rules(): array
     {
-        $id = $this->route('action')?->id ?? null;
+        $id = $this->route('action')?->id;
+
         return [
             'name' => ['required', 'string', 'max:255'],
             'identifier' => [
                 'required',
                 'string',
                 'max:255',
-                // Corrigido para usar Rule::unique
                 Rule::unique('actions', 'identifier')->ignore($id),
             ],
         ];
     }
 
-    /**
-     * Define as mensagens de erro personalizadas.
-     *
-     * @return array
-     */
-    public function messages()
+    public function messages(): array
     {
         return [
             'name.required' => 'O nome é obrigatório',
             'identifier.required' => 'O identificador é obrigatório',
-            'identifier.unique' => 'Este identificador já está cadastrado',   
+            'identifier.unique' => 'Este identificador já está cadastrado',
         ];
     }
 }
-

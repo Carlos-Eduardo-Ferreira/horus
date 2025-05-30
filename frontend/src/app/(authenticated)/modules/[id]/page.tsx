@@ -6,7 +6,7 @@ import { usePageTitle } from "@/hooks/usePageTitle";
 import EntityFormPage from "@/components/EntityFormPage";
 
 export default function ModuleFormPage() {
-  usePageTitle("Módulo");
+  usePageTitle("Cadastro - Módulo");
 
   return (
     <EntityFormPage

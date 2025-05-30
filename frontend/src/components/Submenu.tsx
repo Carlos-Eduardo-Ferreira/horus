@@ -1,5 +1,6 @@
 import { useGlobalHook } from "@/hooks/global.hook";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { MdOutlineKeyboardArrowDown } from "react-icons/md";
 import { IMenuSideBarProps } from "./SidebarMenu/data";
 
@@ -13,6 +14,11 @@ const SubMenu = ({
   menuSideBarItem: _menuSideBarItem,
 }: ISubMenuProps) => {
   const { isMenuOpen } = useGlobalHook();
+  const pathname = usePathname();
+
+  const isSubItemActive = (subItem: IMenuSideBarProps): boolean => {
+    return !!(subItem.path && pathname && pathname.startsWith(subItem.path));
+  };
 
   return (
     <div
@@ -47,8 +53,12 @@ const SubMenu = ({
       {_menuSideBarItem.subMenuItems!.map((Subitem, Subindex) => (
         <div key={Subindex}>
           <Link
-            className={`text-white text-sm p-1 bg-gray-900/100 color-hover-primary flex items-center min-h-[2.75rem] ${
+            className={`text-sm p-1 bg-gray-900/100 color-hover-primary flex items-center min-h-[2.75rem] transition-colors duration-200 ${
               !isMenuOpen ? "last:rounded-br-lg pl-18" : "pl-12"
+            } ${
+              isSubItemActive(Subitem)
+                ? "color-active"
+                : "text-white hover:text-blue-300"
             }`}
             href={Subitem.path!}
           >

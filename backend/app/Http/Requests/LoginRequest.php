@@ -7,71 +7,43 @@ use Illuminate\Foundation\Http\FormRequest;
 
 class LoginRequest extends FormRequest
 {
-    /**
-     * Autoriza o envio da requisição.
-     *
-     * @return bool
-     */
-    public function authorize()
+    public function authorize(): bool
     {
-        // Permite o processamento da requisição
         return true;
     }
 
-    /**
-     * Prepara os dados para validação.
-     * Remove todos os caracteres que não sejam números do campo 'document'.
-     *
-     * @return void
-     */
-    protected function prepareForValidation()
+    protected function prepareForValidation(): void
     {
-        // Verifica se o campo 'document' existe na requisição
-        if ($this->has('document')) {
-            // Limpa o documento deixando apenas números
-            $cleanDocument = StringHelper::onlyNumbers($this->document);
-
-            // Atualiza o valor de 'document' na requisição
+        if ($this->filled('document')) {
             $this->merge([
-                'document' => $cleanDocument
+                'document' => StringHelper::onlyNumbers($this->document)
             ]);
         }
     }
 
-    /**
-     * Define as regras de validação para a requisição.
-     *
-     * @return array
-     */
-    public function rules()
+    public function rules(): array
     {
         return [
             'document' => [
                 'required',
                 'string',
-                // Validação customizada para garantir que o documento contenha números
-                function($attribute, $value, $fail) {
+                'exists:users,document',
+                function ($attribute, $value, $fail) {
                     if (!preg_match('/[0-9]/', $value)) {
                         $fail('O documento deve conter números');
                     }
                 },
-                'exists:users,document'
             ],
-            'password' => 'required|string'
+            'password' => ['required', 'string'],
         ];
     }
 
-    /**
-     * Define as mensagens de erro personalizadas.
-     *
-     * @return array
-     */
-    public function messages()
+    public function messages(): array
     {
         return [
             'document.required' => 'O documento é obrigatório',
             'document.exists' => 'Usuário não encontrado, confira os dados informados',
-            'password.required' => 'A senha é obrigatória'
+            'password.required' => 'A senha é obrigatória',
         ];
     }
 }

@@ -6,7 +6,7 @@ import { usePageTitle } from "@/hooks/usePageTitle";
 import EntityFormPage from "@/components/EntityFormPage";
 
 export default function ActionFormPage() {
-  usePageTitle("Ação de Usuário");
+  usePageTitle("Cadastro - Ação de Usuário");
 
   return (
     <EntityFormPage

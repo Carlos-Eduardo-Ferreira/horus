@@ -8,53 +8,23 @@ use App\Rules\AuthRequiredRule;
 
 class RegisterRequest extends FormRequest
 {
-    /**
-     * Autoriza o envio da requisição.
-     *
-     * @return bool
-     */
-    public function authorize()
+    public function authorize(): bool
     {
-        // Permite o processamento da requisição
         return true;
     }
 
-    /**
-     * Define as regras de validação para a requisição de registro.
-     *
-     * @return array
-     */
-    public function rules()
+    public function rules(): array
     {
         return [
-            // O campo 'name' é nullable para empresas, obrigatório para consumidores via AuthRequiredRule
             'name' => ['nullable', 'string', 'max:255', new AuthRequiredRule],
-            
-            // O campo 'email' é nullable para empresas, obrigatório para consumidores via AuthRequiredRule
             'email' => ['nullable', 'string', 'email', 'max:255', 'unique:users', new AuthRequiredRule],
-            
-            // A senha é obrigatória, mínimo de 8 caracteres e precisa ser confirmada
-            'password' => 'required|string|min:8|confirmed',
-            
-            // O tipo do usuário deve ser 'consumer' ou 'company'
-            'type' => 'required|string|in:consumer,company',
-            
-            // O documento é obrigatório, deve ser único e validado por uma regra customizada
-            'document' => [
-                'required',
-                'string',
-                'unique:users,document',
-                new DocumentRule
-            ],
+            'password' => ['required', 'string', 'min:8', 'confirmed'],
+            'type' => ['required', 'string', 'in:consumer,company'],
+            'document' => ['required', 'string', 'unique:users,document', new DocumentRule],
         ];
     }
 
-    /**
-     * Define as mensagens de erro personalizadas para as validações.
-     *
-     * @return array
-     */
-    public function messages()
+    public function messages(): array
     {
         return [
             'name.required' => 'O nome é obrigatório',
@@ -68,7 +38,6 @@ class RegisterRequest extends FormRequest
             'type.in' => 'O type deve ser consumer ou company',
             'document.required' => 'O número do documento é obrigatório',
             'document.unique' => 'Este documento já está cadastrado no sistema',
-            'document.forEach' => 'O documento deve ter exatamente :length dígitos para :type',
         ];
     }
 }

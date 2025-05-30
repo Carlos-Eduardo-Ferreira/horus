@@ -29,6 +29,10 @@ const menuSideBarItem: IMenuSideBarProps[] = [
         title: "Módulos",
         path: "/modules",
       },
+      {
+        title: "Unidades Locais",
+        path: "/local-units",
+      },
     ],
   },
   {

@@ -66,6 +66,11 @@ body {
   color: #727cf5;
 }
 
+/* Cor para itens ativos no menu */
+.color-active {
+  color: #60a5fa;
+}
+
 /* Cor principal no hover */
 .color-hover-primary {
   transition: color 0.2s ease;
