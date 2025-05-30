@@ -5,6 +5,7 @@ use Illuminate\Http\Request;
 use App\Http\Controllers\AuthController;
 use App\Http\Resources\UserResource;
 use App\Http\Controllers\ActionController;
+use App\Http\Controllers\ModuleController;
 
 // Rotas públicas
 Route::post('/login', [AuthController::class, 'login']);
@@ -23,4 +24,11 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('actions', [ActionController::class, 'storeOrUpdate']);
     Route::put('actions/{action}', [ActionController::class, 'storeOrUpdate']);
     Route::delete('actions/{action}', [ActionController::class, 'destroy']);
+
+    // Rotas para modules
+    Route::get('modules', [ModuleController::class, 'index']);
+    Route::get('modules/{module}', [ModuleController::class, 'show']);
+    Route::post('modules', [ModuleController::class, 'storeOrUpdate']);
+    Route::put('modules/{module}', [ModuleController::class, 'storeOrUpdate']);
+    Route::delete('modules/{module}', [ModuleController::class, 'destroy']);
 });
