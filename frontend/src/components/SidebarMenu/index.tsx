@@ -97,7 +97,7 @@ const SidebarMenu = () => {
       <div className="flex flex-col h-full gap-4 items-center relative justify-start px-4 mt-5">
         {menuSideBarItem.map((item: IMenuSideBarProps, index: number) => (
           <div
-            key={index}
+            key={`menu-item-${index}`}
             className={`relative group w-full last:mb-5
             ${isMenuOpen ? "last:mt-auto" : "last:mt-auto"}`}
           >
@@ -108,11 +108,13 @@ const SidebarMenu = () => {
               onClick={() => 
                 item.subMenu 
                   ? toggleSubMenu(index)
-                  : router.push(item.path ?? "")
+                  : item.path 
+                    ? router.push(item.path)
+                    : undefined
               }
             >
               <div
-                data-tooltip-id={item.title}
+                data-tooltip-id={`tooltip-${index}`}
                 className="flex items-center justify-center color-side-bar-item"
               >
                 {item.icon && <item.icon size={iconSize} />}
@@ -138,7 +140,7 @@ const SidebarMenu = () => {
               {!isMenuOpen && (
                 <div className="bg-gray-900 color-side-bar-item font-semibold">
                   <ReactTooltip
-                    id={item.title}
+                    id={`tooltip-${index}`}
                     place="right"
                     content={item.title}
                     variant="dark"
