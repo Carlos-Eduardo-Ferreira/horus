@@ -130,7 +130,7 @@ export function FilterModal({
           </Title>
         </div>
 
-        <div className="space-y-4 mb-6">
+        <div className="space-y-6 mb-6">
           {fields.map((field) => {
             switch (field.type) {
               case 'text':

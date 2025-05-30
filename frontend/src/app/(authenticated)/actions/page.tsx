@@ -2,7 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
-import { ListTable, ListTableColumn } from "@/components/ListTable";
+import { ListTable, ListTableColumn, SortConfig } from "@/components/ListTable";
 import { actionsService, Action, FilterParams } from "@/services/actions";
 import { FilterField, FilterValues } from "@/components/FilterModal";
 
@@ -10,66 +10,88 @@ export default function ActionsPage() {
   const [actions, setActions] = useState<Action[]>([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [lastPage, setLastPage] = useState(1);
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
   const [filterValues, setFilterValues] = useState<FilterValues>({});
+  const [sortConfig, setSortConfig] = useState<SortConfig>({
+    sortBy: 'name',
+    sortOrder: 'asc'
+  });
+
   const router = useRouter();
 
-  // Define as colunas da tabela
+  // Define as colunas da tabela com possibilidade de ordenação
   const columns: ListTableColumn<Action>[] = [
-    { key: "name", label: "Nome", widthPercent: 23, align: 'left' },
-    { key: "identifier", label: "Identificador", widthPercent: 20, align: 'center' },
+    { key: "name", label: "Nome", widthPercent: 23, align: 'left', sortable: true },
+    { key: "identifier", label: "Identificador", widthPercent: 20, align: 'center', sortable: true },
   ];
 
-  // Define os campos de filtro com seus respectivos formatadores
+  // Define os campos disponíveis no filtro e seus formatadores
   const filterFields: FilterField[] = [
     { name: "name", label: "Nome", type: "text", formatter: "uppercase" },
     { name: "identifier", label: "Identificador", type: "text", formatter: "identifier" },
   ];
 
-  // Carrega as ações do usuário
+  /* Busca a lista de ações a partir do backend.
+    Pode ser chamada tanto para carregamento inicial quanto para paginação ou filtros. */
   const fetchActions = async (page: number = 1, filters: FilterParams = {}) => {
     const token = localStorage.getItem("token");
-    if (!token) return;
-    
-    setIsLoading(true);
+    if (!token) {
+      setIsLoading(false);
+      return;
+    }
+
+    if (!isLoading) setIsLoading(true);
+
     try {
-      const response = await actionsService.list(token, page, filters);
-      
+      const response = await actionsService.list(token, page, filters, sortConfig);
+
       if (page === 1) {
+        // Substitui os dados ao carregar a primeira página
         setActions(response.data);
       } else {
-        // Adicionar novos dados aos dados existentes
-        setActions(prev => [...prev, ...response.data]);
+        // Acrescenta os novos dados à lista atual, evitando duplicatas
+        setActions(prev => {
+          const existingIds = new Set(prev.map(item => item.id));
+          const uniqueNewData = response.data.filter(item => !existingIds.has(item.id));
+          return [...prev, ...uniqueNewData];
+        });
       }
-      
+
       setCurrentPage(response.meta.current_page);
       setLastPage(response.meta.last_page);
     } catch (error) {
-      console.error("Error fetching actions:", error);
+      console.error("Erro ao buscar ações:", error);
     } finally {
       setIsLoading(false);
     }
   };
 
-  // Carrega os dados iniciais
+  // Carrega os dados iniciais e reexecuta quando filtros ou ordenação mudarem
   useEffect(() => {
     fetchActions(1, filterValues);
-  }, [filterValues]);
+  }, [filterValues, sortConfig]);
 
-  // Lidar com o carregamento de mais dados durante a rolagem
+  // Realiza a paginação quando o usuário solicita mais dados
   const handleLoadMore = () => {
     if (isLoading || currentPage >= lastPage) return;
     fetchActions(currentPage + 1, filterValues);
   };
 
-  // Lidar com a aplicação de filtros
+  // Aplica novos filtros e reinicia a listagem
   const handleFilter = (filters: FilterValues) => {
     setFilterValues(filters);
-    // Reiniciar para a primeira página ao filtrar
-    fetchActions(1, filters);
+    setActions([]);
+    setCurrentPage(1);
   };
 
-  // Callback de exclusão para passar ao ListTable
+  // Aplica nova ordenação e reinicia a listagem
+  const handleSort = (newSortConfig: SortConfig) => {
+    setSortConfig(newSortConfig);
+    setActions([]);
+    setCurrentPage(1);
+  };
+
+  // Exclui uma action e atualiza a lista
   const handleDelete = async (id: number) => {
     const token = localStorage.getItem("token");
     if (!token) return;
@@ -79,19 +101,22 @@ export default function ActionsPage() {
 
   return (
     <ListTable
+      title="Ações de usuário"
       columns={columns}
       data={actions}
-      title="Ações de usuário"
       basePath="/actions"
       actionsColumnWidth={10}
+      isLoading={isLoading}
+      isLoadingMore={isLoading && currentPage > 1 && actions.length > 0}
+      hasMoreData={currentPage < lastPage}
+      filterFields={filterFields}
+      initialFilterValues={filterValues}
+      sortConfig={sortConfig}
       onNewClick={() => router.push("/actions/new")}
       onDelete={handleDelete}
       onFilter={handleFilter}
       onLoadMore={handleLoadMore}
-      isLoadingMore={isLoading && currentPage > 1}
-      hasMoreData={currentPage < lastPage}
-      filterFields={filterFields}
-      initialFilterValues={filterValues}
+      onSort={handleSort}
     />
   );
 }

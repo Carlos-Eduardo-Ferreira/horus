@@ -20,8 +20,18 @@ export interface FilterParams {
   [key: string]: string | number | null;
 }
 
+export interface SortConfig {
+  sortBy: string;
+  sortOrder: 'asc' | 'desc';
+}
+
 export const actionsService = {
-  async list(token: string, page: number = 1, filters: FilterParams = {}): Promise<PaginatedResponse<Action>> {
+  async list(
+    token: string, 
+    page: number = 1, 
+    filters: FilterParams = {},
+    sort?: SortConfig
+  ): Promise<PaginatedResponse<Action>> {
     const validFilters = Object.entries(filters).reduce((acc, [key, value]) => {
       if (value !== null && value !== undefined && value !== '') {
         acc[key] = value;
@@ -29,12 +39,15 @@ export const actionsService = {
       return acc;
     }, {} as FilterParams);
     
+    const params = {
+      page,
+      ...validFilters,
+      ...(sort && { sort_by: sort.sortBy, sort_order: sort.sortOrder })
+    };
+    
     const { data } = await axios.get<PaginatedResponse<Action>>('/api/actions', {
       headers: { Authorization: `Bearer ${token}` },
-      params: { 
-        page,
-        ...validFilters
-      }
+      params
     });
     return data;
   },

@@ -28,8 +28,24 @@ class ActionController extends Controller
             $query->where('identifier', 'like', '%' . $request->identifier . '%');
         }
         
-        // Ordenar e paginar
-        $actions = $query->orderBy('name', 'asc')->paginate(100);
+        // Aplicar ordenação se os parâmetros forem fornecidos
+        if ($request->has('sort_by') && $request->has('sort_order')) {
+            $sortBy = $request->sort_by;
+            $sortOrder = $request->sort_order === 'desc' ? 'desc' : 'asc';
+            
+            // Apenas permite ordenar por colunas válidas na tabela
+            if (in_array($sortBy, ['name', 'identifier', 'id'])) {
+                $query->orderBy($sortBy, $sortOrder);
+            } else {
+                // Ordenação padrão
+                $query->orderBy('name', 'asc');
+            }
+        } else {
+            // Ordenação padrão quando não há parâmetros de ordenação
+            $query->orderBy('name', 'asc');
+        }
+        
+        $actions = $query->paginate(50);
         
         return ActionResource::collection($actions);
     }

@@ -14,6 +14,7 @@ import { FiFilter } from "react-icons/fi";
 import { ConfirmModal } from "@/components/ConfirmModal";
 import { ExclamationTriangleIcon } from "@heroicons/react/24/outline";
 import { FilterModal, FilterField, FilterValues } from "@/components/FilterModal";
+import { BiSortZA, BiSortAZ } from "react-icons/bi";
 
 export type ListTableColumn<T> = {
   key: keyof T;
@@ -21,7 +22,13 @@ export type ListTableColumn<T> = {
   widthPercent: number;
   align?: 'left' | 'center' | 'right';
   render?: (value: T[keyof T], row: T) => ReactNode;
+  sortable?: boolean;
 };
+
+export interface SortConfig {
+  sortBy: string;
+  sortOrder: 'asc' | 'desc';
+}
 
 export type ListTableProps<T> = {
   columns: ListTableColumn<T>[];
@@ -39,10 +46,13 @@ export type ListTableProps<T> = {
   deleteModalConfirmText?: string;
   deleteModalCancelText?: string;
   onLoadMore?: () => void;
+  isLoading?: boolean;
   isLoadingMore?: boolean;
   hasMoreData?: boolean;
   filterFields?: FilterField[];
   initialFilterValues?: FilterValues;
+  sortConfig?: SortConfig;
+  onSort?: (sortConfig: SortConfig) => void;
 };
 
 export function ListTable<T extends { id: number }>({
@@ -61,10 +71,13 @@ export function ListTable<T extends { id: number }>({
   deleteModalConfirmText = "Excluir",
   deleteModalCancelText = "Cancelar",
   onLoadMore,
+  isLoading = false,
   isLoadingMore = false,
   hasMoreData = false,
   filterFields = [],
   initialFilterValues = {},
+  sortConfig,
+  onSort,
 }: ListTableProps<T>) {
   const router = useRouter();
 
@@ -162,6 +175,25 @@ export function ListTable<T extends { id: number }>({
     }
   }, [handleScroll, onLoadMore]);
 
+  // Função para lidar com o clique do cabeçalho da coluna para ordenar
+  const handleSort = (columnKey: keyof T, sortable: boolean | undefined) => {
+    if (!onSort || !sortable) {
+      return; // Não faz nada se a coluna não for ordenável ou não tiver callback de ordenação
+    }
+    
+    let newSortOrder: 'asc' | 'desc' = 'asc';
+    
+    if (sortConfig && sortConfig.sortBy === String(columnKey)) {
+      // Alterna a direção da ordenação se já estiver ordenando por esta coluna
+      newSortOrder = sortConfig.sortOrder === 'asc' ? 'desc' : 'asc';
+    }
+    
+    onSort({
+      sortBy: String(columnKey),
+      sortOrder: newSortOrder
+    });
+  };
+
   const columns = [
     ...userColumns,
     {
@@ -169,6 +201,7 @@ export function ListTable<T extends { id: number }>({
       label: 'Ações',
       widthPercent: actionsColumnWidth,
       align: 'center' as const,
+      sortable: false,
       render: (_value: T[keyof T], row: T) => (
         <div className="flex gap-2 justify-center">
           <Tooltip content="Editar">
@@ -194,6 +227,7 @@ export function ListTable<T extends { id: number }>({
   const REF_DESKTOP = 1920;
   const totalPercent = columns.reduce((s, c) => s + c.widthPercent, 0);
   const FREEZE_PX = (totalPercent / 100) * REF_DESKTOP;
+  const skeletonRowCount = 5; // Número de linhas de esqueleto a serem exibidas durante o carregamento
 
   return (
     <div className="w-full flex justify-center">
@@ -291,51 +325,88 @@ export function ListTable<T extends { id: number }>({
                     {columns.map((col) => (
                       <th
                         key={String(col.key)}
-                        className="px-2 sm:px-6 py-2 sm:py-3"
+                        className={`px-2 sm:px-6 py-2 sm:py-3 ${col.sortable ? 'cursor-pointer hover:bg-gray-50' : ''}`}
+                        onClick={() => handleSort(col.key, col.sortable)}
                       >
-                        <Title size="xs" align={col.align || 'left'}>
-                          {col.label}
-                        </Title>
+                        <div className={`flex items-center ${col.align === 'center' ? 'justify-center' : col.align === 'right' ? 'justify-end' : 'justify-start'}`}>
+                          <Title size="xs" align={col.align || 'left'}>
+                            {col.label}
+                          </Title>
+                          
+                          {/* Indicador de ordenação com novos ícones */}
+                          {col.sortable && sortConfig && sortConfig.sortBy === String(col.key) && (
+                            <span className="ml-1 text-gray-600">
+                              {sortConfig.sortOrder === 'asc' ? 
+                                <BiSortAZ className="w-5 h-5" /> : 
+                                <BiSortZA className="w-5 h-5" />}
+                            </span>
+                          )}
+                        </div>
                       </th>
                     ))}
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-200">
-                  {data.map((row, index) => (
-                    <tr key={row.id} className={`${index % 2 === 0 ? 'bg-gray-50' : 'bg-white'} hover:bg-gray-100`}>
-                      {columns.map((col) => (
-                        <td
-                          key={String(col.key)}
-                          className="px-2 sm:px-6 py-2 sm:py-3 whitespace-normal break-words"
+                  {isLoading && data.length === 0 && !isLoadingMore ? (
+                    // Skeleton Loading State
+                    Array.from({ length: skeletonRowCount }).map((_, rowIndex) => (
+                      <tr key={`skeleton-${rowIndex}`} className={`${rowIndex % 2 === 0 ? 'bg-gray-50' : 'bg-white'}`}>
+                        {columns.map((col) => (
+                          <td
+                            key={`skeleton-${rowIndex}-${String(col.key)}`}
+                            className="px-2 sm:px-6 py-3 whitespace-normal break-words"
+                          >
+                            <div className={`h-4 bg-gray-200 rounded animate-pulse ${col.align === 'center' ? 'mx-auto w-1/2' : col.align === 'right' ? 'ml-auto w-3/4' : 'w-3/4'}`}></div>
+                          </td>
+                        ))}
+                      </tr>
+                    ))
+                  ) : (
+                    <>
+                      {data.map((row, index) => (
+                        <tr 
+                          key={row.id} 
+                          className={`${index % 2 === 0 ? 'bg-gray-50' : 'bg-white'} hover:bg-gray-100 ${isLoading && !isLoadingMore ? 'opacity-60' : ''}`}
                         >
-                          {col.render ? (
-                            col.render(row[col.key], row)
-                          ) : (
-                            <Text size="sm" align={col.align || 'left'}>
-                              {String(row[col.key])}
-                            </Text>
-                          )}
-                        </td>
+                          {columns.map((col) => (
+                            <td
+                              key={String(col.key)}
+                              className="px-2 sm:px-6 py-2 sm:py-3 whitespace-normal break-words"
+                            >
+                              {col.render ? (
+                                col.render(row[col.key], row)
+                              ) : (
+                                <Text size="sm" align={col.align || 'left'}>
+                                  {String(row[col.key])}
+                                </Text>
+                              )}
+                            </td>
+                          ))}
+                        </tr>
                       ))}
-                    </tr>
-                  ))}
-                  {data.length === 0 && (
-                    <tr>
-                      <td colSpan={columns.length} className="pt-3">
-                        <Alert icon={FaInfoCircle} variant="primary">
-                          Nenhum registro encontrado.
-                        </Alert>
-                      </td>
-                    </tr>
-                  )}
-                  {isLoadingMore && (
-                    <tr>
-                      <td colSpan={columns.length} className="py-3 text-center">
-                        <div className="flex justify-center items-center py-4">
-                          <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-primary"></div>
-                        </div>
-                      </td>
-                    </tr>
+                      
+                      {/* Mostrar "Nenhum registro" somente se não estiver carregando e os dados estiverem realmente vazios */}
+                      {!isLoading && data.length === 0 && !isLoadingMore && (
+                        <tr>
+                          <td colSpan={columns.length} className="pt-3">
+                            <Alert icon={FaInfoCircle} variant="primary">
+                              Nenhum registro encontrado.
+                            </Alert>
+                          </td>
+                        </tr>
+                      )}
+                      
+                      {/* Spinner para carregar mais itens (paginação) */}
+                      {isLoadingMore && (
+                        <tr>
+                          <td colSpan={columns.length} className="py-3 text-center">
+                            <div className="flex justify-center items-center py-4">
+                              <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-primary"></div>
+                            </div>
+                          </td>
+                        </tr>
+                      )}
+                    </>
                   )}
                 </tbody>
               </table>
