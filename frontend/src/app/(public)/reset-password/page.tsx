@@ -5,8 +5,12 @@ import LabeledInput from '@/components/LabeledInput';
 import Title from '@/components/Title';
 import Button from '@/components/Button';
 import Text from '@/components/Text';
+import { usePageTitle } from '@/hooks/usePageTitle';
 
 export default function ResetPasswordPage() {
+  // Define o título da página
+  usePageTitle('Redefinir Senha');
+  
   const [form, setForm] = useState({
     password: '',
     confirmPassword: ''

@@ -7,12 +7,17 @@ import { actionsService } from "@/services/actions";
 import { validateActionForm } from "@/validators/actionValidator";
 import axios from "axios";
 import { formatField } from "@/utils/fieldFormatters";
+import { usePageTitle } from "@/hooks/usePageTitle";
 
 export default function ActionFormPage() {
   const params = useParams() as Record<string, string> | null;
   const id = params && typeof params === "object" && "id" in params ? String(params.id) : "";
-  const router = useRouter();
   const isNew = id === "new";
+  
+  // Define o título da página de acordo com a ação (nova ou edição)
+  usePageTitle(isNew ? 'Nova Ação de Usuário' : 'Editar Ação de Usuário');
+  
+  const router = useRouter();
   const [submitting, setSubmitting] = useState(false);
   const [loading, setLoading] = useState(!isNew);
 

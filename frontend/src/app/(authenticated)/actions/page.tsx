@@ -5,8 +5,12 @@ import { useEffect, useState } from "react";
 import { ListTable, ListTableColumn, SortConfig } from "@/components/ListTable";
 import { actionsService, Action, FilterParams } from "@/services/actions";
 import { FilterField, FilterValues } from "@/components/FilterModal";
+import { usePageTitle } from "@/hooks/usePageTitle";
 
 export default function ActionsPage() {
+  // Define o título da página
+  usePageTitle('Ações de Usuário');
+  
   const [actions, setActions] = useState<Action[]>([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [lastPage, setLastPage] = useState(1);

@@ -12,11 +12,15 @@ import Title from '@/components/Title';
 import Button from '@/components/Button';
 import Text from '@/components/Text';
 import TextLink from '@/components/TextLink';
+import { usePageTitle } from '@/hooks/usePageTitle';
 
 // Tipagem para possíveis erros de campo
 interface FieldErrors { document?: string; password?: string }
 
 export default function LoginPage() {
+  // Define o título da página
+  usePageTitle('Login');
+  
   const router = useRouter();
 
   // Estado para armazenar dados do formulário

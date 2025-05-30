@@ -1,14 +1,18 @@
-'use client';
+"use client";
 
 import { useState } from 'react';
-import { IoIosArrowBack } from "react-icons/io";
+import { IoIosArrowBack } from 'react-icons/io';
 import LabeledInput from '@/components/LabeledInput';
 import Title from '@/components/Title';
 import Button from '@/components/Button';
 import Text from '@/components/Text';
 import TextLink from '@/components/TextLink';
+import { usePageTitle } from '@/hooks/usePageTitle';
 
 export default function RecoverPasswordPage() {
+  // Define o título da página
+  usePageTitle('Recuperar Senha');
+
   const [email, setEmail] = useState('');
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -19,9 +23,9 @@ export default function RecoverPasswordPage() {
   return (
     <>
       <div className="mb-6">
-        <TextLink 
-          href="/login" 
-          size="sm" 
+        <TextLink
+          href="/login"
+          size="sm"
           variant="secondary"
           className="flex items-center"
         >
@@ -32,7 +36,7 @@ export default function RecoverPasswordPage() {
       <Title className="mb-1" size="md" align="center">
         Recuperar senha
       </Title>
-      
+
       <Text size="sm" align="center" className="mb-8">
         Insira seu e-mail para alteração de senha
       </Text>
@@ -47,7 +51,7 @@ export default function RecoverPasswordPage() {
               type="email"
               tabIndex={1}
               value={email}
-              onChange={e => setEmail(e.target.value)}
+              onChange={(e) => setEmail(e.target.value)}
             />
           </div>
         </div>

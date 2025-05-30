@@ -13,6 +13,7 @@ import TextLink from '@/components/TextLink'
 import Text from '@/components/Text'
 import Button from '@/components/Button'
 import { IoIosArrowBack } from 'react-icons/io'
+import { usePageTitle } from '@/hooks/usePageTitle'
 
 type UserType = 'consumer' | 'company' | null;
 
@@ -26,6 +27,9 @@ interface FieldErrors {
 }
 
 export default function RegisterPage() {
+  // Define o título da página
+  usePageTitle('Cadastro');
+  
   const router = useRouter();
   const [userType, setUserType] = useState<UserType>(null);
   const [form, setForm] = useState({
