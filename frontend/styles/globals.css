@@ -57,6 +57,10 @@ body {
   color: #71717a;
 }
 
+.color-subtext {
+  color: #a1a1aa;
+}
+
 .color-title {
   color: #09090b;
 }
@@ -97,12 +101,11 @@ body {
 @media (max-width: 1920px) {
   .freeze-width {
     width: var(--freeze);
+    max-width: 100%;
   }
 }
 
-/* 3) Para telas menores que 1280px:
-   - O elemento ocupa 100% da largura disponível.
-   - Isso garante que ele se ajuste bem em telas pequenas e não crie scroll horizontal. */
+/* 3) Para telas menores que 1280px */
 @media (max-width: 1280px) {
   .freeze-width {
     width: 100% !important;

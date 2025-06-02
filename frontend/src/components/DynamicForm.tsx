@@ -59,12 +59,16 @@ function groupFieldsByRows(fields: DynamicFormField[]) {
 // Agrupamento baseado em `groups`, garantindo que nenhuma linha exceda 6 colunas
 function groupFieldsByGroupsWithLimit(groups: DynamicFormField[][]) {
   const rows: DynamicFormField[][] = [];
+  
   for (const group of groups) {
     let currentRow: DynamicFormField[] = [];
     let currentSum = 0;
+    
     for (const field of group) {
       if (currentSum + field.col > 6) {
-        rows.push(currentRow);
+        if (currentRow.length > 0) {
+          rows.push(currentRow);
+        }
         currentRow = [field];
         currentSum = field.col;
       } else {
@@ -72,7 +76,10 @@ function groupFieldsByGroupsWithLimit(groups: DynamicFormField[][]) {
         currentSum += field.col;
       }
     }
-    if (currentRow.length > 0) rows.push(currentRow);
+    
+    if (currentRow.length > 0) {
+      rows.push(currentRow);
+    }
   }
   return rows;
 }
@@ -108,11 +115,8 @@ export default function DynamicForm({
 
   const maxCols = Math.max(...rows.map(row => row.reduce((sum, f) => sum + f.col, 0)), 1);
   const cardWidth = getCardWidthByMaxCols(maxCols);
-
-  // freeze-width logic igual ao ListTable
-  const REF_DESKTOP = 1920;
   const totalPercent = (maxCols / 6) * 100;
-  const freezePx = (totalPercent / 100) * REF_DESKTOP;
+  const freezePercent = totalPercent;
 
   // Função para lidar com o cancelamento usando App Router
   const handleCancel = () => {
@@ -129,7 +133,7 @@ export default function DynamicForm({
       style={
         {
           '--pct': `${totalPercent/100}`,
-          '--freeze': `${freezePx}px`
+          '--freeze': `${freezePercent}%`
         } as React.CSSProperties
       }
     >
@@ -149,7 +153,7 @@ export default function DynamicForm({
           </div>
 
           {/* Campos em linhas */}
-          <div className="flex flex-col gap-y-4">
+          <div className="flex flex-col gap-y-6">
             {/* Renderização dos campos em linhas */}
             {rows.map((row, rowIdx) => {
               return (

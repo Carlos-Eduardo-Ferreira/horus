@@ -26,7 +26,8 @@ export interface EntityFormPageProps {
     }>;
   };
   validateForm: (fields: DynamicFormField[]) => { [key: string]: string };
-  fields: DynamicFormField[];
+  fields?: DynamicFormField[]; 
+  groups?: DynamicFormField[][];
   returnPath: string;
   titleNew: string;
   titleEdit: string;
@@ -36,7 +37,8 @@ export interface EntityFormPageProps {
 export default function EntityFormPage({
   service,
   validateForm,
-  fields: initialFields,
+  fields: legacyFields,
+  groups: initialGroups,
   returnPath,
   titleNew,
   titleEdit,
@@ -52,7 +54,9 @@ export default function EntityFormPage({
   const router = useRouter();
   const [submitting, setSubmitting] = useState(false);
   const [loading, setLoading] = useState(!isNew);
-  const [groups, setGroups] = useState<DynamicFormField[][]>([initialFields]);
+  const [groups, setGroups] = useState<DynamicFormField[][]>(
+    initialGroups || (legacyFields ? [legacyFields] : [[]])
+  );
   const [fieldErrors, setFieldErrors] = useState<{ [key: string]: string }>({});
   const [hasSubmitted, setHasSubmitted] = useState(false);
 
@@ -65,11 +69,17 @@ export default function EntityFormPage({
       
       service.get(id, token)
         .then(data => {
-          const updatedFields = initialFields.map(field => ({
-            ...field,
-            value: data[field.name as keyof typeof data] || ""
-          }));
-          setGroups([updatedFields]);
+          const updateGroupsWithData = (groupsToUpdate: DynamicFormField[][]) => {
+            return groupsToUpdate.map(group =>
+              group.map(field => ({
+                ...field,
+                value: data[field.name as keyof typeof data] || ""
+              }))
+            );
+          };
+
+          const dataGroups = initialGroups || (legacyFields ? [legacyFields] : [[]]);
+          setGroups(updateGroupsWithData(dataGroups));
           setLoading(false);
         })
         .catch(error => {
@@ -77,7 +87,7 @@ export default function EntityFormPage({
           setLoading(false);
         });
     }
-  }, [id, isNew, service, initialFields]);
+  }, [id, isNew, service, initialGroups, legacyFields]);
 
   // Aplica formatações ao campo (se definidas) e atualiza os dados no formulário
   const handleChange = (name: string, value: string | number) => {
