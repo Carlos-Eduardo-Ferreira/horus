@@ -6,6 +6,10 @@ export interface Action {
   identifier: string;
 }
 
+export type ActionWithIndex = Action & {
+  [key: string]: string | number | boolean | null | undefined;
+};
+
 export interface PaginatedResponse<T> {
   data: T[];
   meta: {
@@ -51,23 +55,23 @@ export const actionsService = {
     });
     return data;
   },
-  async get(id: number | string, token: string): Promise<Action> {
+  async get(id: number | string, token: string): Promise<ActionWithIndex> {
     const { data } = await axios.get<{ data: Action }>(`/api/actions/${id}`, {
       headers: { Authorization: `Bearer ${token}` }
     });
-    return data.data;
+    return data.data as ActionWithIndex;
   },
-  async create(payload: { name: string; identifier: string }, token: string): Promise<Action> {
+  async create(payload: Partial<ActionWithIndex>, token: string): Promise<ActionWithIndex> {
     const { data } = await axios.post<{ data: Action }>(`/api/actions`, payload, {
       headers: { Authorization: `Bearer ${token}` }
     });
-    return data.data;
+    return data.data as ActionWithIndex;
   },
-  async update(id: number | string, payload: { name: string; identifier: string }, token: string): Promise<Action> {
+  async update(id: number | string, payload: Partial<ActionWithIndex>, token: string): Promise<ActionWithIndex> {
     const { data } = await axios.put<{ data: Action }>(`/api/actions/${id}`, payload, {
       headers: { Authorization: `Bearer ${token}` }
     });
-    return data.data;
+    return data.data as ActionWithIndex;
   },
   async remove(id: number | string, token: string): Promise<void> {
     await axios.delete(`/api/actions/${id}`, {

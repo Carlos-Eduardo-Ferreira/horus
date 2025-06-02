@@ -4,9 +4,6 @@ use Illuminate\Support\Facades\Route;
 use Illuminate\Http\Request;
 use App\Http\Controllers\AuthController;
 use App\Http\Resources\UserResource;
-use App\Http\Controllers\ActionController;
-use App\Http\Controllers\ModuleController;
-use App\Http\Controllers\LocalUnitController;
 
 // Rotas públicas
 Route::post('/login', [AuthController::class, 'login']);
@@ -19,24 +16,35 @@ Route::middleware('auth:sanctum')->group(function () {
     });
     Route::post('/logout', [AuthController::class, 'logout']);
 
-    // Rotas para actions
-    Route::get('actions', [ActionController::class, 'index']);
-    Route::get('actions/{action}', [ActionController::class, 'show']);
-    Route::post('actions', [ActionController::class, 'storeOrUpdate']);
-    Route::put('actions/{action}', [ActionController::class, 'storeOrUpdate']);
-    Route::delete('actions/{action}', [ActionController::class, 'destroy']);
+    // States
+    Route::controller(\App\Http\Controllers\StateController::class)->group(function () {
+        Route::get('states', 'index');
+    });
 
-    // Rotas para modules
-    Route::get('modules', [ModuleController::class, 'index']);
-    Route::get('modules/{module}', [ModuleController::class, 'show']);
-    Route::post('modules', [ModuleController::class, 'storeOrUpdate']);
-    Route::put('modules/{module}', [ModuleController::class, 'storeOrUpdate']);
-    Route::delete('modules/{module}', [ModuleController::class, 'destroy']);
+    // Local Units
+    Route::controller(\App\Http\Controllers\LocalUnitController::class)->group(function () {
+        Route::get('local-units', 'index');
+        Route::get('local-units/{localUnit}', 'show');
+        Route::post('local-units', 'storeOrUpdate');
+        Route::put('local-units/{localUnit}', 'storeOrUpdate');
+        Route::delete('local-units/{localUnit}', 'destroy');
+    });
 
-    // Rotas para local units
-    Route::get('local-units', [LocalUnitController::class, 'index']);
-    Route::get('local-units/{local-unit}', [LocalUnitController::class, 'show']);
-    Route::post('local-units', [LocalUnitController::class, 'storeOrUpdate']);
-    Route::put('local-units/{local-unit}', [LocalUnitController::class, 'storeOrUpdate']);
-    Route::delete('local-units/{local-unit}', [LocalUnitController::class, 'destroy']);
+    // Actions
+    Route::controller(\App\Http\Controllers\ActionController::class)->group(function () {
+        Route::get('actions', 'index');
+        Route::get('actions/{action}', 'show');
+        Route::post('actions', 'storeOrUpdate');
+        Route::put('actions/{action}', 'storeOrUpdate');
+        Route::delete('actions/{action}', 'destroy');
+    });
+
+    // Modules
+    Route::controller(\App\Http\Controllers\ModuleController::class)->group(function () {
+        Route::get('modules', 'index');
+        Route::get('modules/{module}', 'show');
+        Route::post('modules', 'storeOrUpdate');
+        Route::put('modules/{module}', 'storeOrUpdate');
+        Route::delete('modules/{module}', 'destroy');
+    });
 });

@@ -11,6 +11,7 @@ import clsx from 'clsx';
 import Button from '@/components/Button';
 import Title from '@/components/Title';
 import LabeledInput from '@/components/LabeledInput';
+import LabeledSelect from '@/components/LabeledSelect';
 import { IoFilterOutline } from 'react-icons/io5';
 import { formatField, FormatterType } from '@/utils/fieldFormatters';
 
@@ -21,7 +22,7 @@ export interface FilterField {
   label: string;
   type: FilterFieldType;
   formatter?: FormatterType;
-  options?: { label: string; value: string | number }[];
+  options?: { label: string; value: string }[];
 }
 
 export interface FilterValues {
@@ -154,33 +155,14 @@ export function FilterModal({
                 );
               case 'select':
                 return (
-                  <div key={field.name} className="relative flex flex-col gap-1">
-                    <select
-                      value={values[field.name] as string || ''}
-                      onChange={(e) => handleChange(field.name, e.target.value)}
-                      className="w-full px-4 h-11 flex items-center 
-                                rounded-xl bg-white border border-gray-300 shadow-md
-                                hover:-translate-y-[1px] text-gray-700
-                                focus:outline-none focus:border-gray-600 focus:ring-1 focus:ring-gray-600
-                                duration-200"
-                    >
-                      <option value="">Selecione...</option>
-                      {field.options?.map(option => (
-                        <option key={option.value} value={option.value}>
-                          {option.label}
-                        </option>
-                      ))}
-                    </select>
-                    <div className="absolute left-4 -top-3 pointer-events-none">
-                      <div className="relative">
-                        <div className="absolute inset-0 top-1/2 h-1/2 bg-white" />
-                        <div className="absolute inset-0 bottom-1/2 h-1/2 bg-common" />
-                        <span className="relative px-1 text-sm text-gray-600">
-                          {field.label}
-                        </span>
-                      </div>
-                    </div>
-                  </div>
+                  <LabeledSelect
+                    key={field.name}
+                    title={field.label}
+                    options={field.options || []}
+                    value={String(values[field.name] || '')}
+                    onChange={(value) => handleChange(field.name, value)}
+                    placeholder="Selecione..."
+                  />
                 );
               case 'date':
                 return (

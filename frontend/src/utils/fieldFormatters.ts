@@ -55,10 +55,12 @@ export const fieldFormatters = {
 
   // Telefone: (12) 3456-7890
   phone: (value: string | number): string => {
-    return String(value)
-      .replace(/\D/g, '')
-      .slice(0, 10)
-      .replace(/(\d{2})(\d{4})(\d)/, '($1) $2-$3');
+    const cleaned = String(value).replace(/\D/g, '').slice(0, 10);
+    
+    if (cleaned.length === 0) return '';
+    if (cleaned.length <= 2) return `(${cleaned}`;
+    if (cleaned.length <= 6) return `(${cleaned.slice(0, 2)}) ${cleaned.slice(2)}`;
+    return `(${cleaned.slice(0, 2)}) ${cleaned.slice(2, 6)}-${cleaned.slice(6)}`;
   }
 };
 

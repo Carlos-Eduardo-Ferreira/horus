@@ -1,6 +1,6 @@
 "use client";
 
-import { actionsService } from "@/services/actions";
+import { actionsService, ActionWithIndex } from "@/services/actions";
 import { validateActionForm } from "@/validators/actionValidator";
 import { usePageTitle } from "@/hooks/usePageTitle";
 import EntityFormPage from "@/components/EntityFormPage";
@@ -9,7 +9,7 @@ export default function ActionFormPage() {
   usePageTitle("Cadastro - Ação de Usuário");
 
   return (
-    <EntityFormPage
+    <EntityFormPage<ActionWithIndex>
       service={actionsService}
       validateForm={validateActionForm}
       fields={[
@@ -17,8 +17,8 @@ export default function ActionFormPage() {
         { name: "identifier", label: "Identificador", type: "text", col: 1, value: "" }
       ]}
       returnPath="/actions"
-      titleNew="Nova Ação de Usuário"
-      titleEdit="Editar Ação de Usuário"
+      titleNew="Cadastro • Ação de Usuário"
+      titleEdit="Edição • Ação de Usuário"
       formatters={{
         name: "uppercase",
         identifier: "identifier"

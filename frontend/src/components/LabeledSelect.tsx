@@ -3,42 +3,47 @@
 import React from 'react'
 import { cn } from '@/utils/classNames'
 
-export interface LabeledInputProps extends React.InputHTMLAttributes<HTMLInputElement> {
-  title: string
-  error?: string
-  mutedBackground?: boolean
+export interface SelectOption {
+  value: string
+  label: string
 }
 
-export default function LabeledInput({
+export interface LabeledSelectProps extends Omit<React.SelectHTMLAttributes<HTMLSelectElement>, 'onChange'> {
+  title: string
+  options: SelectOption[]
+  error?: string
+  mutedBackground?: boolean
+  placeholder?: string
+  onChange?: (value: string) => void
+}
+
+export default function LabeledSelect({
   id,
   title,
-  type = 'text',
-  defaultValue,
+  options,
   value,
   onChange,
   className,
   tabIndex,
   error,
   mutedBackground = false,
+  placeholder,
   ...rest
-}: LabeledInputProps) {
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    onChange?.(e)
+}: LabeledSelectProps) {
+  const handleChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const newValue = e.target.value;
+    onChange?.(newValue);
   }
 
   const labelBackground = mutedBackground ? 'bg-muted' : 'bg-common';
 
   return (
     <div className="relative flex flex-col gap-1">
-      <input
+      <select
         id={id}
-        type={type}
         tabIndex={tabIndex}
-        defaultValue={defaultValue}
-        value={value}
+        value={value || ""}
         onChange={handleChange}
-        autoComplete="off"
-        spellCheck={false}
         className={cn(
           'w-full px-4 h-11 flex items-center transition-all',
           'rounded-xl',
@@ -47,17 +52,44 @@ export default function LabeledInput({
           error ? 'border-red-500' : 'border-gray-300',
           'shadow-md',
           'hover:-translate-y-[1px]',
-          'text-gray-700',
           'focus:outline-none',
           error
             ? 'focus:border-red-500 focus:ring-1 focus:ring-red-500'
             : 'focus:border-gray-600 focus:ring-1 focus:ring-gray-600',
           'transform transition-transform duration-200',
+          'appearance-none',
+          'cursor-pointer',
+          value ? 'text-gray-700' : 'text-gray-400',
           className
         )}
-        style={{ paddingTop: 0, paddingBottom: 0 }}
         {...rest}
-      />
+      >
+        <option value="" disabled className="text-gray-400">
+          {placeholder || "Selecione..."}
+        </option>
+        {options.map((option) => (
+          <option key={option.value} value={option.value} className="text-gray-700">
+            {option.label}
+          </option>
+        ))}
+      </select>
+
+      {/* Custom arrow */}
+      <div className="absolute right-4 top-1/2 transform -translate-y-1/2 pointer-events-none">
+        <svg
+          className="w-4 h-4 text-gray-400"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+        >
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth={2}
+            d="M19 9l-7 7-7-7"
+          />
+        </svg>
+      </div>
 
       <div className="absolute left-4 -top-3 pointer-events-none">
         <div className="relative">
