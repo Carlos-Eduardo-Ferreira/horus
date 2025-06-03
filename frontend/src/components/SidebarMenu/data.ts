@@ -1,5 +1,4 @@
 import { MdDashboard, MdSecurity } from "react-icons/md";
-import { IoMdOptions } from "react-icons/io";
 import { IconType } from "react-icons";
 
 export type IMenuSideBarProps = {
@@ -36,9 +35,12 @@ const menuSideBarItem: IMenuSideBarProps[] = [
     ],
   },
   {
-    title: "Preferências",
-    icon: IoMdOptions,
+    title: "",
   },
+  // {
+  //   title: "Preferências",
+  //   icon: IoMdOptions,
+  // },
 ];
 
 export { menuSideBarItem };

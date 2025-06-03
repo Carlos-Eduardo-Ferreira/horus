@@ -224,9 +224,9 @@ export function ListTable<T extends { id: number }>({
     }
   ];
 
-  const REF_DESKTOP = 1920;
+  const REFERENCE_CONTENT_WIDTH = 1920 - 240 - 48;
   const totalPercent = columns.reduce((s, c) => s + c.widthPercent, 0);
-  const FREEZE_PX = (totalPercent / 100) * REF_DESKTOP;
+  const FREEZE_PX = (totalPercent / 100) * REFERENCE_CONTENT_WIDTH;
   const skeletonRowCount = 5; // Número de linhas de esqueleto a serem exibidas durante o carregamento
 
   return (

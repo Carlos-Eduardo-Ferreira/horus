@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import LabeledInput from "./LabeledInput";
 import LabeledSelect from "./LabeledSelect";
 import Button from "./Button";
@@ -7,6 +7,13 @@ import { FaSave } from "react-icons/fa";
 import { TbArrowBackUp } from "react-icons/tb";
 import { useRouter } from "next/navigation";
 import { cn } from "@/utils/classNames";
+
+function getResponsiveMaxColsPerRow(width: number): number {
+  if (width >= 1900) return 6;
+  if (width >= 1400) return 4;
+  if (width >= 1000) return 2;
+  return 1;
+}
 
 type FieldType = "text" | "number" | "password" | "email" | "select";
 
@@ -46,13 +53,20 @@ export interface DynamicFormProps {
   customTitle?: string;
 }
 
-function groupFieldsByRows(fields: DynamicFormField[]) {
+function groupFieldsIntoRowsByLimit(fields: DynamicFormField[], maxColsLimit: number): DynamicFormField[][] {
   const rows: DynamicFormField[][] = [];
   let currentRow: DynamicFormField[] = [];
   let currentSum = 0;
 
   for (const field of fields) {
-    if (currentSum + field.col > 6) {
+    if (field.col > maxColsLimit) {
+      if (currentRow.length > 0) {
+        rows.push(currentRow);
+      }
+      rows.push([field]);
+      currentRow = [];
+      currentSum = 0;
+    } else if (currentSum + field.col > maxColsLimit) {
       rows.push(currentRow);
       currentRow = [field];
       currentSum = field.col;
@@ -61,44 +75,19 @@ function groupFieldsByRows(fields: DynamicFormField[]) {
       currentSum += field.col;
     }
   }
-  if (currentRow.length > 0) rows.push(currentRow);
-  return rows;
-}
-
-function groupFieldsByGroupsWithLimit(groups: DynamicFormField[][]) {
-  const rows: DynamicFormField[][] = [];
-
-  for (const group of groups) {
-    let currentRow: DynamicFormField[] = [];
-    let currentSum = 0;
-
-    for (const field of group) {
-      if (currentSum + field.col > 6) {
-        if (currentRow.length > 0) {
-          rows.push(currentRow);
-        }
-        currentRow = [field];
-        currentSum = field.col;
-      } else {
-        currentRow.push(field);
-        currentSum += field.col;
-      }
-    }
-
-    if (currentRow.length > 0) {
-      rows.push(currentRow);
-    }
+  if (currentRow.length > 0) {
+    rows.push(currentRow);
   }
   return rows;
 }
 
-function getCardWidthByMaxCols(maxCols: number) {
-  if (maxCols === 1) return "w-1/6";
-  if (maxCols === 2) return "w-1/3";
-  if (maxCols === 3) return "w-1/2";
-  if (maxCols === 4) return "w-2/3";
-  if (maxCols === 5) return "w-5/6";
-  return "w-full";
+function groupStructuredGroupsByLimit(structuredGroups: DynamicFormField[][], maxColsLimit: number): DynamicFormField[][] {
+  const allRenderableRows: DynamicFormField[][] = [];
+  for (const onePredefinedGroup of structuredGroups) {
+    const rowsFromThisGroup = groupFieldsIntoRowsByLimit(onePredefinedGroup, maxColsLimit);
+    allRenderableRows.push(...rowsFromThisGroup);
+  }
+  return allRenderableRows;
 }
 
 export default function DynamicForm({
@@ -108,7 +97,7 @@ export default function DynamicForm({
   submitting,
   isNew,
   recordId,
-  groups,
+  groups: initialGroupsProp,
   returnPath,
   fieldErrors = {},
   hasSubmitted = false,
@@ -116,16 +105,42 @@ export default function DynamicForm({
   customTitle,
 }: DynamicFormProps) {
   const router = useRouter();
+  const [currentMaxColsPerRow, setCurrentMaxColsPerRow] = useState(
+    typeof window !== "undefined" ? getResponsiveMaxColsPerRow(window.innerWidth) : 6
+  );
 
-  const rows = groups
-    ? groupFieldsByGroupsWithLimit(groups)
-    : groupFieldsByRows(fields);
+  useEffect(() => {
+    const calculateMaxCols = () => {
+      setCurrentMaxColsPerRow(getResponsiveMaxColsPerRow(window.innerWidth));
+    };
+    calculateMaxCols();
+    window.addEventListener("resize", calculateMaxCols);
+    return () => window.removeEventListener("resize", calculateMaxCols);
+  }, []);
 
-  const maxCols = Math.max(...rows.map(row => row.reduce((sum, f) => sum + f.col, 0)), 1);
-  const cardWidth = getCardWidthByMaxCols(maxCols);
-  const totalPercent = (maxCols / 6) * 100;
-  const freezePercent = totalPercent;
+  let dataMaxCols: number;
+  if (initialGroupsProp && initialGroupsProp.length > 0 && initialGroupsProp.some(g => g.length > 0)) {
+    const tempRowsForSizing = groupStructuredGroupsByLimit(initialGroupsProp, 6);
+    dataMaxCols = Math.max(1, ...tempRowsForSizing.map(row => row.reduce((sum, f) => sum + f.col, 0)));
+  } else {
+    const tempRowsForSizing = groupFieldsIntoRowsByLimit(fields, 6);
+    dataMaxCols = Math.max(1, ...tempRowsForSizing.map(row => row.reduce((sum, f) => sum + f.col, 0)));
+  }
+  
+  const totalPercentForCardStyle = (dataMaxCols / 6) * 100;
+  
+  const VIEWPORT_REFERENCE_WIDTH_PX = 1920;
+  const SIDEBAR_WIDTH_OPEN_PX = 240; 
+  const MAIN_CONTENT_HORIZONTAL_PADDING_PX = 48; 
 
+  const REFERENCE_CONTENT_WIDTH = VIEWPORT_REFERENCE_WIDTH_PX - SIDEBAR_WIDTH_OPEN_PX - MAIN_CONTENT_HORIZONTAL_PADDING_PX;
+  const freezePx = (totalPercentForCardStyle / 100) * REFERENCE_CONTENT_WIDTH;
+
+  const finalRowsToRender: DynamicFormField[][] = 
+    initialGroupsProp && initialGroupsProp.length > 0 && initialGroupsProp.some(g => g.length > 0)
+    ? groupStructuredGroupsByLimit(initialGroupsProp, currentMaxColsPerRow)
+    : groupFieldsIntoRowsByLimit(fields, currentMaxColsPerRow);
+  
   const handleCancel = () => {
     if (returnPath) {
       router.push(returnPath);
@@ -136,11 +151,11 @@ export default function DynamicForm({
 
   return (
     <div
-      className={`mx-auto freeze-width w-full sm:${cardWidth}`}
+      className={`mx-auto freeze-width w-full`}
       style={
         {
-          '--pct': `${totalPercent / 100}`,
-          '--freeze': `${freezePercent}%`
+          '--pct': `${totalPercentForCardStyle / 100}`,
+          '--freeze': `${freezePx}px`
         } as React.CSSProperties
       }
     >
@@ -159,11 +174,12 @@ export default function DynamicForm({
           </div>
 
           <div className="flex flex-col gap-y-6">
-            {rows.map((row, rowIdx) => {
+            {finalRowsToRender.map((row, rowIdx) => {
+              const sumOfColsInThisRow = row.reduce((sum, f) => sum + f.col, 0);
               return (
                 <div className="form-fields-row" key={rowIdx}>
                   {row.map((field) => {
-                    const widthPct = (field.col / maxCols) * 100;
+                    const widthPct = sumOfColsInThisRow > 0 ? (field.col / sumOfColsInThisRow) * 100 : 100;
                     const specialConfig = specialFields[field.name];
 
                     return (

@@ -84,7 +84,7 @@ const SidebarMenu = () => {
 
   return (
     <motion.div
-      className={`h-screen flex flex-col bg-gray-900 z-40
+      className={`min-h-screen flex flex-col bg-gray-900 z-40
         ${initialRender && !isMenuOpen ? "hidden md:block md:w-[88px]" : ""}
         ${initialRender && isMenuOpen ? "md:w-[15rem] max-md:w-full max-md:absolute max-md:h-screen" : ""}
         ${!initialRender && isMenuOpen ? "max-md:w-full max-md:absolute max-md:h-screen" : "hidden md:block"}

@@ -1,11 +1,13 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useParams, useRouter } from "next/navigation";
 import DynamicForm, { DynamicFormField, SpecialFieldConfig } from "@/components/DynamicForm";
 import axios from "axios";
 import { formatField, FormatterType } from "@/utils/fieldFormatters";
 import { usePageTitle } from "@/hooks/usePageTitle";
+import { useContentOverflow } from "@/hooks/useContentOverflow";
+import { useLayout } from "@/app/(authenticated)/layout";
 
 type EntityData = Record<string, string | number | boolean | null | undefined>;
 
@@ -54,6 +56,10 @@ export default function EntityFormPage<T extends EntityData = EntityData>({
   usePageTitle(isNew ? titleNew : titleEdit);
 
   const router = useRouter();
+  const { setStickyFooter } = useLayout();
+  const formRef = useRef<HTMLDivElement>(null);
+  const isContentOverflowing = useContentOverflow(formRef);
+  
   const [submitting, setSubmitting] = useState(false);
   const [loading, setLoading] = useState(!isNew);
   const [groups, setGroups] = useState<DynamicFormField[][]>(
@@ -62,6 +68,16 @@ export default function EntityFormPage<T extends EntityData = EntityData>({
   const [fieldErrors, setFieldErrors] = useState<{ [key: string]: string }>({});
   const [hasSubmitted, setHasSubmitted] = useState(false);
   const [specialFields, setSpecialFields] = useState<{ [fieldName: string]: SpecialFieldConfig }>({});
+
+  useEffect(() => {
+    setStickyFooter(!isContentOverflowing);
+  }, [isContentOverflowing, setStickyFooter]);
+
+  useEffect(() => {
+    return () => {
+      setStickyFooter(true);
+    };
+  }, [setStickyFooter]);
 
   useEffect(() => {
     if (!isNew && id) {
@@ -309,19 +325,21 @@ export default function EntityFormPage<T extends EntityData = EntityData>({
   const customTitle = isNew ? titleNew : titleEdit;
 
   return (
-    <DynamicForm
-      fields={allFields}
-      onChange={handleChange}
-      onSubmit={handleSubmit}
-      submitting={submitting}
-      isNew={isNew}
-      recordId={id}
-      groups={groups}
-      returnPath={returnPath}
-      fieldErrors={fieldErrors}
-      hasSubmitted={hasSubmitted}
-      specialFields={specialFields}
-      customTitle={customTitle}
-    />
+    <div ref={formRef}>
+      <DynamicForm
+        fields={allFields}
+        onChange={handleChange}
+        onSubmit={handleSubmit}
+        submitting={submitting}
+        isNew={isNew}
+        recordId={id}
+        groups={groups}
+        returnPath={returnPath}
+        fieldErrors={fieldErrors}
+        hasSubmitted={hasSubmitted}
+        specialFields={specialFields}
+        customTitle={customTitle}
+      />
+    </div>
   );
 }

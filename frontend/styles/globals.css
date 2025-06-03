@@ -94,7 +94,9 @@ body {
 
 /* 1) Para telas maiores que 1920px */
 .freeze-width {
-  width: calc(100vw * var(--pct));
+  width: calc(100% * var(--pct));
+  margin-left: auto;
+  margin-right: auto;
 }
 
 /* 2) Para telas entre 1280px e 1920px */
@@ -148,7 +150,6 @@ body {
   .form-field-container {
     width: 100% !important;
     max-width: 100% !important;
-    margin-bottom: 1.25rem;
   }
   
   /* Último campo com espaço reduzido antes dos botões */
