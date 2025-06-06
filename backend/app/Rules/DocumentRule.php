@@ -23,9 +23,11 @@ class DocumentRule implements ValidationRule
             if (!DocumentValidator::validateCnpj($document)) {
                 $fail('O CNPJ informado não é válido.');
             }
+
+            return;
         }
 
-        if ($type === 'consumer') {
+        if (in_array($type, ['consumer', 'user'], true)) {
             if (strlen($document) !== 11) {
                 $fail('O CPF deve ter exatamente 11 dígitos.');
                 return;
@@ -34,6 +36,10 @@ class DocumentRule implements ValidationRule
             if (!DocumentValidator::validateCpf($document)) {
                 $fail('O CPF informado não é válido.');
             }
+
+            return;
         }
+
+        $fail('Tipo de usuário inválido para validação de documento.');
     }
 }

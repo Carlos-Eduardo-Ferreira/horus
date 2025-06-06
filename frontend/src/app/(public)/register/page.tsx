@@ -75,7 +75,13 @@ export default function RegisterPage() {
   };
   
   const handleInputChange = (field: string, value: string) => {
-    const updated = { ...form, [field]: value };
+    let formattedValue = value;
+    
+    if (field === 'email') {
+      formattedValue = value.toLowerCase();
+    }
+    
+    const updated = { ...form, [field]: formattedValue };
     setForm(updated);
     
     // Se já tentou enviar, revalida o campo conforme digita
@@ -233,7 +239,7 @@ export default function RegisterPage() {
         </Text>
       )}
 
-      <form onSubmit={handleSubmit} className="flex flex-col space-y-6" noValidate>
+      <form noValidate onSubmit={handleSubmit} className="flex flex-col space-y-6">
         <div className="grid gap-6">
           {userType === 'consumer' ? (
             <>

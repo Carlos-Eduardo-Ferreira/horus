@@ -71,6 +71,7 @@ export default function LocalUnitFormPage() {
         complement: "uppercase",
         neighborhood: "uppercase",
         city: "uppercase",
+        email: "lowercase",
         phone: "phone"
       }}
       autoFillConfig={{

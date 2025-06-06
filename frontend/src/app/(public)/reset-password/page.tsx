@@ -41,7 +41,7 @@ export default function ResetPasswordPage() {
         Escolha sua nova senha
       </Text>
 
-      <form onSubmit={handleSubmit} className="flex flex-col space-y-6" noValidate>
+      <form noValidate onSubmit={handleSubmit} className="flex flex-col space-y-6">
         <div className="grid gap-6">
           <div>
             <LabeledInput

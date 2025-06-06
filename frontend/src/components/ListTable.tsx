@@ -53,6 +53,8 @@ export type ListTableProps<T> = {
   initialFilterValues?: FilterValues;
   sortConfig?: SortConfig;
   onSort?: (sortConfig: SortConfig) => void;
+  canEdit?: (item: T) => boolean;
+  canDelete?: (item: T) => boolean;
 };
 
 export function ListTable<T extends { id: number }>({
@@ -78,6 +80,8 @@ export function ListTable<T extends { id: number }>({
   initialFilterValues = {},
   sortConfig,
   onSort,
+  canEdit,
+  canDelete,
 }: ListTableProps<T>) {
   const router = useRouter();
 
@@ -204,20 +208,45 @@ export function ListTable<T extends { id: number }>({
       sortable: false,
       render: (_value: T[keyof T], row: T) => (
         <div className="flex gap-2 justify-center">
-          <Tooltip content="Editar">
-            <ActionButton
-              icon={GoPencil as React.ForwardRefExoticComponent<React.ComponentProps<'svg'>>}
-              color="primary"
-              onClick={() => router.push(`${basePath}/${row.id}`)}
-            />
-          </Tooltip>
-          <Tooltip content="Excluir">
-            <ActionButton
-              icon={AiOutlineDelete as React.ForwardRefExoticComponent<React.ComponentProps<'svg'>>}
-              color="danger"
-              onClick={() => handleDelete(row.id)}
-            />
-          </Tooltip>
+          {/* Botão de editar */}
+          {!canEdit || canEdit(row) ? (
+            <Tooltip content="Editar">
+              <ActionButton
+                icon={GoPencil as React.ForwardRefExoticComponent<React.ComponentProps<'svg'>>}
+                color="primary"
+                onClick={() => router.push(`${basePath}/${row.id}`)}
+              />
+            </Tooltip>
+          ) : (
+            <Tooltip content="Não é possível editar este usuário">
+              <ActionButton
+                icon={GoPencil as React.ForwardRefExoticComponent<React.ComponentProps<'svg'>>}
+                color="secondary"
+                disabled
+                className="cursor-not-allowed opacity-50"
+              />
+            </Tooltip>
+          )}
+          
+          {/* Botão de excluir */}
+          {!canDelete || canDelete(row) ? (
+            <Tooltip content="Excluir">
+              <ActionButton
+                icon={AiOutlineDelete as React.ForwardRefExoticComponent<React.ComponentProps<'svg'>>}
+                color="danger"
+                onClick={() => handleDelete(row.id)}
+              />
+            </Tooltip>
+          ) : (
+            <Tooltip content="Não é possível excluir este usuário">
+              <ActionButton
+                icon={AiOutlineDelete as React.ForwardRefExoticComponent<React.ComponentProps<'svg'>>}
+                color="secondary"
+                disabled
+                className="cursor-not-allowed opacity-50"
+              />
+            </Tooltip>
+          )}
           {customActions?.(row)}
         </div>
       ),
@@ -377,7 +406,7 @@ export function ListTable<T extends { id: number }>({
                                 col.render(row[col.key], row)
                               ) : (
                                 <Text size="sm" align={col.align || 'left'}>
-                                  {String(row[col.key])}
+                                  {row[col.key] ? String(row[col.key]) : ''}
                                 </Text>
                               )}
                             </td>

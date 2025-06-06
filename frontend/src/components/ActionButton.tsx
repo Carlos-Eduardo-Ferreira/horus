@@ -2,7 +2,7 @@ import React from 'react';
 import { IconProps } from '@phosphor-icons/react';
 import { cn } from '@/utils/classNames';
 
-type ActionButtonColors = 'primary' | 'danger' | 'warning' | 'success';
+type ActionButtonColors = 'primary' | 'danger' | 'warning' | 'success' | 'secondary';
 
 interface ActionButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   icon: React.ForwardRefExoticComponent<IconProps>;
@@ -26,12 +26,17 @@ const colorVariants = {
     background: 'bg-green-50 hover:bg-green-100',
     icon: 'text-green-600',
   },
+  secondary: {
+    background: 'bg-gray-300 hover:bg-gray-400',
+    icon: 'text-gray-900',
+  },
 };
 
 export default function ActionButton({ 
   icon: Icon, 
   color, 
   className,
+  disabled,
   ...props 
 }: ActionButtonProps) {
   const colors = colorVariants[color];
@@ -39,10 +44,12 @@ export default function ActionButton({
   return (
     <button
       className={cn(
-        'w-8 h-8 rounded-lg flex items-center justify-center transition-colors cursor-pointer',
+        'w-8 h-8 rounded-lg flex items-center justify-center transition-colors',
+        disabled ? 'cursor-not-allowed' : 'cursor-pointer', 
         colors.background,
         className
       )}
+      disabled={disabled}
       {...props}
     >
       <Icon className={cn('w-4 h-4', colors.icon)} weight="bold" />

@@ -1,6 +1,7 @@
 export type FormatterType = 
   'uppercase' | 
-  'identifier' | 
+  'lowercase' |
+  'identifier' |
   'cpf' | 
   'cnpj' | 
   'cpfcnpj' | 
@@ -10,6 +11,10 @@ export type FormatterType =
 export const fieldFormatters = {
   uppercase: (value: string | number): string => {
     return String(value).toUpperCase();
+  },
+
+  lowercase: (value: string | number): string => {
+    return String(value).toLowerCase();
   },
 
   identifier: (value: string | number): string => {

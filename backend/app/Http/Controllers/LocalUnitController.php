@@ -67,6 +67,6 @@ class LocalUnitController extends Controller
     {
         $localUnit->delete();
 
-        return response()->json(['message' => 'LocalUnit deleted']);
+        return response()->json(['message' => 'Unidade local deletada com sucesso.'], 204);
     }
 }

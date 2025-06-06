@@ -53,6 +53,6 @@ class ModuleController extends Controller
     {
         $module->delete();
 
-        return response()->json(['message' => 'Module deleted']);
+        return response()->json(['message' => 'Module deletado com sucesso.'], 204);
     }
 }

@@ -1,5 +1,6 @@
 import { MdDashboard, MdSecurity } from "react-icons/md";
 import { IconType } from "react-icons";
+import { IoMdOptions } from "react-icons/io";
 
 export type IMenuSideBarProps = {
   title: string;
@@ -21,26 +22,27 @@ const menuSideBarItem: IMenuSideBarProps[] = [
     subMenu: true,
     subMenuItems: [
       {
+        title: "Usuários",
+        path: "/users",
+      },
+      {
+        title: "Unidades Locais",
+        path: "/local-units",
+      },
+      {
         title: "Ações de Usuário",
         path: "/actions",
       },
       {
         title: "Módulos",
         path: "/modules",
-      },
-      {
-        title: "Unidades Locais",
-        path: "/local-units",
-      },
+      }
     ],
   },
   {
-    title: "",
+    title: "Preferências",
+    icon: IoMdOptions,
   },
-  // {
-  //   title: "Preferências",
-  //   icon: IoMdOptions,
-  // },
 ];
 
 export { menuSideBarItem };

@@ -1,0 +1,120 @@
+<?php
+
+namespace App\Http\Controllers;
+
+use App\Models\User;
+use App\Models\Role;
+use App\Models\UserRole;
+use App\Http\Resources\UserResource;
+use App\Http\Requests\UserRequest;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+use App\Helpers\StringHelper;
+
+class UserController extends Controller
+{
+    public function index(Request $request)
+    {
+        $query = User::query()->with('roles');
+
+        if ($request->name) {
+            $query->where('name', 'like', '%' . $request->name . '%');
+        }
+
+        if ($request->document) {
+            $query->where('document', 'like', '%' . $request->document . '%');
+        }
+
+        $sortBy = $request->get('sort_by', 'name');
+        $sortOrder = $request->get('sort_order', 'asc');
+
+        if (!in_array($sortBy, ['name', 'id'])) {
+            $sortBy = 'name';
+        }
+
+        $query->orderBy($sortBy, $sortOrder === 'desc' ? 'desc' : 'asc');
+
+        return UserResource::collection($query->paginate(50));
+    }
+
+    public function show(User $user)
+    {
+        $user->load('roles');
+        return new UserResource($user);
+    }
+
+    public function storeOrUpdate(UserRequest $request, ?User $user = null)
+    {
+        try {
+            DB::beginTransaction();
+
+            $data = $request->validated();
+            $data['document'] = StringHelper::onlyNumbers($data['document']);
+            
+            // Remove password_confirmation do array de dados
+            unset($data['password_confirmation']);
+
+            if ($user) {
+                // Verificar se pode editar este usuário
+                $role = $user->roles()->first();
+                if ($role && $role->identifier->value !== 'user') {
+                    return response()->json([
+                        'message' => 'Não é possível editar este tipo de usuário'
+                    ], 403);
+                }
+
+                // Se não tem senha, remove do array de atualização
+                if (empty($data['password'])) {
+                    unset($data['password']);
+                }
+
+                $user->update($data);
+            } else {
+                // Criar novo usuário sempre como 'user'
+                $user = User::create($data);
+
+                // Associar role 'user'
+                $role = Role::where('identifier', 'user')->firstOrFail();
+                UserRole::create([
+                    'user_id' => $user->id,
+                    'role_id' => $role->id,
+                    'local_unit_id' => 1
+                ]);
+            }
+
+            DB::commit();
+            return new UserResource($user->load('roles'));
+        } catch (\Throwable $e) {
+            DB::rollBack();
+            
+            if ($e instanceof \Illuminate\Database\QueryException && $e->errorInfo[1] === 1062) {
+                return response()->json([
+                    'message' => 'Erro de validação',
+                    'errors' => [
+                        'document' => ['Este documento já está cadastrado'],
+                        'email' => ['Este email já está cadastrado']
+                    ]
+                ], 422);
+            }
+
+            return response()->json([
+                'message' => 'Não foi possível salvar o usuário'
+            ], 500);
+        }
+    }
+
+    public function destroy(User $user)
+    {
+        // Verificar se pode deletar este usuário
+        $role = $user->roles()->first();
+        if ($role && $role->identifier->value !== 'user') {
+            return response()->json([
+                'message' => 'Não é possível excluir este tipo de usuário'
+            ], 403);
+        }
+
+        $user->delete();
+
+        return response()->json(['message' => 'Usuário deletado com sucesso.'], 204);
+    }
+}

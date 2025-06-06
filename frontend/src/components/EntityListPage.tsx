@@ -6,7 +6,7 @@ import { ListTable, ListTableColumn, SortConfig } from "@/components/ListTable";
 import { FilterField, FilterValues } from "@/components/FilterModal";
 import { usePageTitle } from "@/hooks/usePageTitle";
 
-export interface EntityListPageProps<T> {
+export interface EntityListPageProps<T extends { id: number }> {
   title: string;
   service: {
     list(
@@ -30,6 +30,8 @@ export interface EntityListPageProps<T> {
   basePath: string;
   defaultSort?: SortConfig;
   actionsColumnWidth?: number;
+  canEdit?: (item: T) => boolean;
+  canDelete?: (item: T) => boolean;
 }
 
 export default function EntityListPage<T extends { id: number }>({
@@ -40,6 +42,8 @@ export default function EntityListPage<T extends { id: number }>({
   basePath,
   defaultSort = { sortBy: "name", sortOrder: "asc" },
   actionsColumnWidth = 10,
+  canEdit,
+  canDelete,
 }: EntityListPageProps<T>) {
   // Define o título da aba da página dinamicamente
   usePageTitle(title);
@@ -145,6 +149,8 @@ export default function EntityListPage<T extends { id: number }>({
       onFilter={handleFilter}
       onLoadMore={handleLoadMore}
       onSort={handleSort}
+      canEdit={canEdit}
+      canDelete={canDelete}
     />
   );
 }

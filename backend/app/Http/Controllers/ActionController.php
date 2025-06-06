@@ -53,6 +53,6 @@ class ActionController extends Controller
     {
         $action->delete();
 
-        return response()->json(['message' => 'Action deleted']);
+        return response()->json(['message' => 'Action deletada com sucesso.'], 204);
     }
 }

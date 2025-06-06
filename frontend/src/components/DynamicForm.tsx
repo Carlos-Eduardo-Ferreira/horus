@@ -160,7 +160,7 @@ export default function DynamicForm({
       }
     >
       <div className="bg-white rounded-xl shadow-lg p-6">
-        <form
+        <form noValidate
           className="w-full"
           onSubmit={e => { e.preventDefault(); onSubmit(); }}
           autoComplete="off"

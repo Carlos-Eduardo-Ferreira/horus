@@ -36,12 +36,12 @@ export default function LocalUnitsPage() {
     { 
       key: "name", 
       label: "Nome", 
-      widthPercent: 30, 
+      widthPercent: 40, 
       align: "left", 
       sortable: true,
       render: (value, localUnit) => (
         <div className="flex flex-col">
-          <Text size="sm" className="font-medium color-title">
+          <Text size="sm" className="font-medium color-text">
             {localUnit.name}
           </Text>
           <Text size="xs" className="color-subtext mt-1">
@@ -71,7 +71,7 @@ export default function LocalUnitsPage() {
       align: "left", 
       sortable: false,
       render: (value, localUnit) => (
-        <div className="flex flex-col">
+        <div className="flex flex-col color-text">
           <Text size="sm" noDefaultColor>
             {localUnit.email || '-'}
           </Text>

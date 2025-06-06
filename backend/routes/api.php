@@ -21,6 +21,15 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('states', 'index');
     });
 
+    // Users
+    Route::controller(\App\Http\Controllers\UserController::class)->group(function () {
+        Route::get('users', 'index');
+        Route::get('users/{user}', 'show');
+        Route::post('users', 'storeOrUpdate');
+        Route::put('users/{user}', 'storeOrUpdate');
+        Route::delete('users/{user}', 'destroy');
+    });
+
     // Local Units
     Route::controller(\App\Http\Controllers\LocalUnitController::class)->group(function () {
         Route::get('local-units', 'index');
