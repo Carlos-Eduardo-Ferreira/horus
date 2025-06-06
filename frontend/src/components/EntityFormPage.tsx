@@ -8,6 +8,7 @@ import { formatField, FormatterType } from "@/utils/fieldFormatters";
 import { usePageTitle } from "@/hooks/usePageTitle";
 import { useContentOverflow } from "@/hooks/useContentOverflow";
 import { useLayout } from "@/app/(authenticated)/layout";
+import { useNotificationToast } from '@/hooks/useNotificationToast';
 
 type EntityData = Record<string, string | number | boolean | null | undefined>;
 
@@ -59,6 +60,7 @@ export default function EntityFormPage<T extends EntityData = EntityData>({
   const { setStickyFooter } = useLayout();
   const formRef = useRef<HTMLDivElement>(null);
   const isContentOverflowing = useContentOverflow(formRef);
+  const { success, error: showError } = useNotificationToast();
   
   const [submitting, setSubmitting] = useState(false);
   const [loading, setLoading] = useState(!isNew);
@@ -291,8 +293,10 @@ export default function EntityFormPage<T extends EntityData = EntityData>({
     try {
       if (isNew) {
         await service.create(payload, token);
+        success('Registro criado com sucesso!');
       } else {
         await service.update(id, payload, token);
+        success('Registro atualizado com sucesso!');
       }
 
       setSubmitting(false);
@@ -314,6 +318,9 @@ export default function EntityFormPage<T extends EntityData = EntityData>({
         setFieldErrors(backendErrors);
         const firstError = Object.keys(backendErrors)[0];
         document.getElementById(firstError)?.focus();
+        showError('Verifique os dados informados e tente novamente.');
+      } else {
+        showError('Erro ao salvar o registro. Tente novamente.');
       }
     }
   };

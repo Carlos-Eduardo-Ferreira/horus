@@ -5,6 +5,7 @@ import { useEffect, useState, useCallback } from "react";
 import { ListTable, ListTableColumn, SortConfig } from "@/components/ListTable";
 import { FilterField, FilterValues } from "@/components/FilterModal";
 import { usePageTitle } from "@/hooks/usePageTitle";
+import { useNotificationToast } from '@/hooks/useNotificationToast';
 
 export interface EntityListPageProps<T extends { id: number }> {
   title: string;
@@ -56,6 +57,7 @@ export default function EntityListPage<T extends { id: number }>({
   const [sortConfig, setSortConfig] = useState<SortConfig>(defaultSort);
 
   const router = useRouter();
+  const { success, error } = useNotificationToast();
 
   /**
    * Busca a lista de entidades a partir do backend, com suporte a paginação, filtros e ordenação.
@@ -126,8 +128,14 @@ export default function EntityListPage<T extends { id: number }>({
   const handleDelete = async (id: number) => {
     const token = localStorage.getItem("token");
     if (!token) return;
-    await service.remove(id, token);
-    setEntities((entities) => entities.filter((e) => e.id !== id));
+    
+    try {
+      await service.remove(id, token);
+      setEntities((entities) => entities.filter((e) => e.id !== id));
+      success('Registro excluído com sucesso!');
+    } catch {
+      error('Erro ao excluir o registro. Tente novamente.');
+    }
   };
 
   // Renderiza a tabela reutilizável com filtros, ordenação e paginação
