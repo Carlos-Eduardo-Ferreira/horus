@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState, useRef } from "react";
+import { flushSync } from "react-dom";
 import { useParams, useRouter } from "next/navigation";
 import DynamicForm, { DynamicFormField, SpecialFieldConfig } from "@/components/DynamicForm";
 import axios from "axios";
@@ -37,6 +38,8 @@ export interface EntityFormPageProps<T extends EntityData = EntityData> {
   titleEdit: string;
   formatters?: { [key: string]: FormatterType };
   autoFillConfig?: AutoFillConfig;
+  transformPayload?: (fields: DynamicFormField[]) => Partial<T>;
+  submitting?: boolean; // Adicionado para permitir controle externo do estado de submissão
 }
 
 export default function EntityFormPage<T extends EntityData = EntityData>({
@@ -49,6 +52,8 @@ export default function EntityFormPage<T extends EntityData = EntityData>({
   titleEdit,
   formatters = {},
   autoFillConfig,
+  transformPayload,
+  submitting: submittingProp = false,
 }: EntityFormPageProps<T>) {
   const params = useParams() as Record<string, string> | null;
   const id = params && typeof params === "object" && "id" in params ? String(params.id) : "";
@@ -70,6 +75,13 @@ export default function EntityFormPage<T extends EntityData = EntityData>({
   const [fieldErrors, setFieldErrors] = useState<{ [key: string]: string }>({});
   const [hasSubmitted, setHasSubmitted] = useState(false);
   const [specialFields, setSpecialFields] = useState<{ [fieldName: string]: SpecialFieldConfig }>({});
+  
+  // Ref para manter sempre o estado mais atual dos grupos
+  const groupsRef = useRef(groups);
+  groupsRef.current = groups;
+  
+  // Flag para controlar se os dados já foram carregados uma vez
+  const dataLoadedRef = useRef(false);
 
   useEffect(() => {
     setStickyFooter(!isContentOverflowing);
@@ -82,7 +94,10 @@ export default function EntityFormPage<T extends EntityData = EntityData>({
   }, [setStickyFooter]);
 
   useEffect(() => {
-    if (!isNew && id) {
+    // Só carrega os dados se ainda não foram carregados e não é um novo registro
+    if (!isNew && id && !dataLoadedRef.current) {
+      dataLoadedRef.current = true; // Marca como carregado ANTES da chamada
+      
       setLoading(true);
       const token = localStorage.getItem("token");
       if (!token) return;
@@ -113,8 +128,10 @@ export default function EntityFormPage<T extends EntityData = EntityData>({
         .catch(error => {
           console.error("Erro ao carregar dados:", error);
           setLoading(false);
+          dataLoadedRef.current = false; // Permite tentar novamente em caso de erro
         });
-    } else {
+    } else if (isNew) {
+      // Para novos registros, inicializa os grupos vazios
       const initializedGroups = (initialGroups || (legacyFields ? [legacyFields] : [[]])).map(group =>
         group.map(field => ({
           ...field,
@@ -123,11 +140,12 @@ export default function EntityFormPage<T extends EntityData = EntityData>({
       );
       setGroups(initializedGroups);
     }
-  }, [id, isNew, service, initialGroups, legacyFields, formatters]);
+  }, [id, isNew, service, formatters, initialGroups, legacyFields]);
 
   const handleChange = (name: string, value: string | number) => {
     let formattedValue = value;
 
+    // Aplica formatação em todos os campos, incluindo o trigger field
     if (formatters[name]) {
       formattedValue = formatField(formatters[name], value);
     }
@@ -138,22 +156,25 @@ export default function EntityFormPage<T extends EntityData = EntityData>({
         [name]: { ...prev[name], error: null }
       }));
     }
-
-    setGroups(groups =>
-      groups.map(row =>
-        row.map(f => {
-          if (f.name === name) {
-            return { ...f, value: formattedValue };
-          }
-          return f;
-        })
-      )
-    );
+    
+    // Atualiza o estado e força sincronização imediata
+    flushSync(() => {
+      setGroups(groups =>
+        groups.map(row =>
+          row.map(f => {
+            if (f.name === name) {
+              return { ...f, value: formattedValue };
+            }
+            return f;
+          })
+        )
+      );
+    });
 
     if (autoFillConfig && name === autoFillConfig.triggerField) {
       const cleanValue = String(formattedValue).replace(/\D/g, '');
       if (cleanValue.length === autoFillConfig.triggerLength) {
-        handleAutoFill(cleanValue);
+        handleAutoFillWithCurrentState(cleanValue);
       }
     }
 
@@ -166,8 +187,10 @@ export default function EntityFormPage<T extends EntityData = EntityData>({
     }
   };
 
-  const handleAutoFill = async (value: string) => {
-    if (!autoFillConfig || !value || value.replace(/\D/g, '').length !== autoFillConfig.triggerLength) return;
+  const handleAutoFillWithCurrentState = async (value: string) => {
+    if (!autoFillConfig || !value || value.replace(/\D/g, '').length !== autoFillConfig.triggerLength) {
+      return;
+    }
 
     const triggerField = autoFillConfig.triggerField;
 
@@ -183,11 +206,18 @@ export default function EntityFormPage<T extends EntityData = EntityData>({
     try {
       const data = await autoFillConfig.service(value);
 
-      if (data) {
-        setGroups(groups =>
-          groups.map(row =>
+      if (data && Object.keys(data).length > 0) {
+        // Atualiza usando o estado atual dos grupos
+        setGroups(currentGroups => {
+          const newGroups = currentGroups.map(row =>
             row.map(f => {
               const mappedField = autoFillConfig.fieldMappings[f.name];
+              
+              // Não atualiza o campo trigger durante auto-preenchimento
+              if (f.name === autoFillConfig.triggerField) {
+                return f;
+              }
+              
               if (mappedField && data[mappedField]) {
                 let newValue = data[mappedField];
 
@@ -204,38 +234,12 @@ export default function EntityFormPage<T extends EntityData = EntityData>({
               }
               return f;
             })
-          )
-        );
-
-        if (hasSubmitted) {
-          const updatedFields = groups.flat().map(f => {
-            const mappedField = autoFillConfig.fieldMappings[f.name];
-            if (mappedField && data[mappedField]) {
-              let newValue = data[mappedField];
-
-              if (formatters[f.name]) {
-                newValue = formatField(formatters[f.name], newValue);
-              }
-
-              if (f.type === 'select' && autoFillConfig.findOptionMapping && f.options) {
-                const option = autoFillConfig.findOptionMapping(data[mappedField], f.options);
-                return { ...f, value: option?.value || f.value };
-              }
-
-              return { ...f, value: newValue };
-            }
-            return f;
-          });
-          const errors = validateForm(updatedFields);
-          delete errors[autoFillConfig.triggerField];
-          setFieldErrors(errors);
-        }
+          );
+          
+          return newGroups;
+        });
       }
     } catch (error) {
-      if (!(error instanceof Error)) {
-        console.error('Erro ao buscar dados:', error);
-      }
-
       if (error instanceof Error) {
         setSpecialFields(prev => ({
           ...prev,
@@ -269,6 +273,14 @@ export default function EntityFormPage<T extends EntityData = EntityData>({
   const handleSubmit = async () => {
     setHasSubmitted(true);
 
+    // Verifica se algum campo especial está carregando (consultando API)
+    const isAnyFieldLoading = Object.values(specialFields).some(field => field.loading);
+    
+    if (isAnyFieldLoading) {
+      // Não permite submit enquanto algum campo está carregando
+      return;
+    }
+
     const allFields = groups.flat();
     const errors = validateForm(allFields);
 
@@ -285,10 +297,16 @@ export default function EntityFormPage<T extends EntityData = EntityData>({
     const token = localStorage.getItem("token");
     if (!token) return;
 
-    const payload: Partial<T> = {};
-    allFields.forEach(field => {
-      (payload as Record<string, unknown>)[field.name] = String(field.value || "");
-    });
+    // Usa transformPayload se fornecido
+    const payload: Partial<T> = transformPayload
+      ? transformPayload(allFields)
+      : (() => {
+          const p: Partial<T> = {};
+          allFields.forEach(field => {
+            (p as Record<string, unknown>)[field.name] = String(field.value || "");
+          });
+          return p;
+        })();
 
     try {
       if (isNew) {
@@ -331,13 +349,20 @@ export default function EntityFormPage<T extends EntityData = EntityData>({
 
   const customTitle = isNew ? titleNew : titleEdit;
 
+  // Verifica se algum campo especial está carregando
+  const isAnyFieldLoading = Object.values(specialFields).some(field => field.loading);
+  
+  // Se o prop submitting for true, força o estado de submissão (bloqueia o botão)
+  // Também bloqueia se algum campo especial estiver carregando
+  const effectiveSubmitting = submittingProp || submitting || isAnyFieldLoading;
+
   return (
     <div ref={formRef}>
       <DynamicForm
         fields={allFields}
         onChange={handleChange}
         onSubmit={handleSubmit}
-        submitting={submitting}
+        submitting={effectiveSubmitting}
         isNew={isNew}
         recordId={id}
         groups={groups}

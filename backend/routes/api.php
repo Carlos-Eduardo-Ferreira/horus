@@ -8,6 +8,7 @@ use App\Http\Resources\UserResource;
 // Rotas públicas
 Route::post('/login', [AuthController::class, 'login']);
 Route::post('/register', [AuthController::class, 'register']);
+Route::get('/cnpj/{cnpj}', [\App\Http\Controllers\CnpjProxyController::class, 'fetch']);
 
 // Rotas protegidas
 Route::middleware('auth:sanctum')->group(function () {

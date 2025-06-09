@@ -5,7 +5,7 @@ import { validateLocalUnitForm } from "@/validators/localUnitValidator";
 import { usePageTitle } from "@/hooks/usePageTitle";
 import EntityFormPage from "@/components/EntityFormPage";
 import { statesService } from "@/services/states";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { cepService } from "@/services/cepService";
 import { findStateOptionByViaCepUF } from "@/constants/brazilianStates";
 
@@ -13,6 +13,9 @@ export default function LocalUnitFormPage() {
   usePageTitle("Cadastro - Unidade Local");
   
   const [stateOptions, setStateOptions] = useState<{ value: string; label: string }[]>([]);
+  const [autoFillLoading, setAutoFillLoading] = useState(false);
+  const autoFillLoadingRef = useRef(setAutoFillLoading);
+  autoFillLoadingRef.current = setAutoFillLoading;
 
   useEffect(() => {
     const loadStates = async () => {
@@ -78,15 +81,22 @@ export default function LocalUnitFormPage() {
         triggerField: "zip_code",
         triggerLength: 8,
         service: async (cep: string) => {
-          const addressData = await cepService.fetchAddress(cep);
-          if (!addressData) return null;
-          
-          return {
-            street: addressData.logradouro,
-            neighborhood: addressData.bairro,
-            city: addressData.localidade,
-            state_uf: addressData.uf
-          };
+          autoFillLoadingRef.current(true);
+          try {
+            const addressData = await cepService.fetchAddress(cep);
+            if (!addressData) return null;
+            
+            return {
+              street: addressData.logradouro,
+              neighborhood: addressData.bairro,
+              city: addressData.localidade,
+              state_uf: addressData.uf
+            };
+          } catch (error) {
+            throw error;
+          } finally {
+            autoFillLoadingRef.current(false);
+          }
         },
         fieldMappings: {
           street: "street",
@@ -99,6 +109,7 @@ export default function LocalUnitFormPage() {
           return findStateOptionByViaCepUF(uf, options);
         }
       }}
+      submitting={autoFillLoading}
     />
   );
 }

@@ -12,6 +12,14 @@ class DocumentRule implements ValidationRule
     public function validate(string $attribute, mixed $value, Closure $fail): void
     {
         $type = request()->input('type');
+
+        // Se não veio via input, tenta buscar do usuário da rota (edição)
+        if ($type === null && request()->route('user')) {
+            $user = request()->route('user');
+            $roleObj = $user?->roles()->first()?->identifier;
+            $type = $roleObj->value;
+        }
+
         $document = StringHelper::onlyNumbers($value);
 
         if ($type === 'company') {
@@ -27,7 +35,7 @@ class DocumentRule implements ValidationRule
             return;
         }
 
-        if (in_array($type, ['consumer', 'user'], true)) {
+        if (in_array($type, ['consumer', 'user', 'master', 'admin'], true)) {
             if (strlen($document) !== 11) {
                 $fail('O CPF deve ter exatamente 11 dígitos.');
                 return;

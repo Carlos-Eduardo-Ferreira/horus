@@ -54,16 +54,15 @@ class UserController extends Controller
             // Remove password_confirmation do array de dados
             unset($data['password_confirmation']);
 
-            if ($user) {
-                // Verificar se pode editar este usuário
-                $role = $user->roles()->first();
-                if ($role && $role->identifier->value !== 'user') {
-                    return response()->json([
-                        'message' => 'Não é possível editar este tipo de usuário'
-                    ], 403);
-                }
+            // Se name ou legal_name vierem como string vazia, transforma em null
+            if (array_key_exists('name', $data) && $data['name'] === '') {
+                $data['name'] = null;
+            }
+            if (array_key_exists('legal_name', $data) && $data['legal_name'] === '') {
+                $data['legal_name'] = null;
+            }
 
-                // Se não tem senha, remove do array de atualização
+            if ($user) {
                 if (empty($data['password'])) {
                     unset($data['password']);
                 }
@@ -105,14 +104,6 @@ class UserController extends Controller
 
     public function destroy(User $user)
     {
-        // Verificar se pode deletar este usuário
-        $role = $user->roles()->first();
-        if ($role && $role->identifier->value !== 'user') {
-            return response()->json([
-                'message' => 'Não é possível excluir este tipo de usuário'
-            ], 403);
-        }
-
         $user->delete();
 
         return response()->json(['message' => 'Usuário deletado com sucesso.'], 204);

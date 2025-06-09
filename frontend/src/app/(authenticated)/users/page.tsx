@@ -31,8 +31,8 @@ export default function UsersPage() {
     { name: "document", label: "CPF", type: "text", formatter: "cpf" }
   ];
 
-  const canEdit = (item: User) => item.role === 'user';
-  const canDelete = (item: User) => item.role === 'user';
+  const canEdit = () => true;
+  const canDelete = () => true;
 
   return (
     <EntityListPage

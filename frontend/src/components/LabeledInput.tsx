@@ -20,6 +20,7 @@ export default function LabeledInput({
   tabIndex,
   error,
   mutedBackground = false,
+  disabled,
   ...rest
 }: LabeledInputProps) {
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -39,20 +40,21 @@ export default function LabeledInput({
         onChange={handleChange}
         autoComplete="off"
         spellCheck={false}
+        disabled={disabled}
         className={cn(
           'w-full px-4 h-11 flex items-center transition-all',
           'rounded-xl',
-          'bg-white',
           'border',
-          error ? 'border-red-500' : 'border-gray-300',
           'shadow-md',
-          'hover:-translate-y-[1px]',
           'text-gray-700',
           'focus:outline-none',
+          error ? 'border-red-500' : 'border-gray-300',
           error
             ? 'focus:border-red-500 focus:ring-1 focus:ring-red-500'
             : 'focus:border-gray-600 focus:ring-1 focus:ring-gray-600',
-          'transform transition-transform duration-200',
+          disabled 
+            ? 'bg-gray-50 cursor-not-allowed shadow-sm border-gray-200 hover:border-gray-200'
+            : 'bg-white hover:-translate-y-[1px] transform transition-transform duration-200 cursor-text',
           className
         )}
         style={{ paddingTop: 0, paddingBottom: 0 }}
@@ -61,7 +63,10 @@ export default function LabeledInput({
 
       <div className="absolute left-4 -top-3 pointer-events-none">
         <div className="relative">
-          <div className="absolute inset-0 top-1/2 h-1/2 bg-white" />
+          <div className={cn(
+            "absolute inset-0 top-1/2 h-1/2",
+            disabled ? "bg-gray-50" : "bg-white"
+          )} />
           <div className={`absolute inset-0 bottom-1/2 h-1/2 ${labelBackground}`} />
           <span className="relative px-1 text-sm text-gray-600">
             {title}

@@ -210,7 +210,7 @@ export default function DynamicForm({
                               onChange={e => onChange(field.name, e.target.value)}
                               placeholder={field.placeholder}
                               required={field.required}
-                              disabled={field.disabled || submitting || (specialConfig?.loading)}
+                              disabled={field.disabled || submitting}
                               error={field.error}
                               name={field.name}
                               className={cn(
@@ -218,8 +218,6 @@ export default function DynamicForm({
                                 hasSubmitted && fieldErrors[field.name]
                                   ? "border-red-500 focus:border-red-500 focus:ring-1 focus:ring-red-500"
                                   : "border-gray-300 focus:border-gray-600 focus:ring-1 focus:ring-gray-600",
-                                submitting && "bg-gray-100",
-                                specialConfig?.loading && "bg-blue-50",
                                 specialConfig?.error && "border-orange-500"
                               )}
                             />
@@ -255,6 +253,7 @@ export default function DynamicForm({
               type="button"
               buttonType="compact"
               onClick={handleCancel}
+              disabled={submitting}
             >
               <TbArrowBackUp className="mr-1.5" /> Cancelar
             </Button>
@@ -264,7 +263,17 @@ export default function DynamicForm({
               buttonType="compact"
               disabled={submitting}
             >
-              <FaSave className="mr-1.5" /> Salvar
+              {submitting ? (
+                <>
+                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-1.5"></div>
+                  Aguarde...
+                </>
+              ) : (
+                <>
+                  <FaSave className="mr-1.5" /> 
+                  Salvar
+                </>
+              )}
             </Button>
           </div>
         </form>
