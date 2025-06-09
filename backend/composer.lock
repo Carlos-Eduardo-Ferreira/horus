@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "85c1d2065f70e38b0d6bf66559fb13c5",
+    "content-hash": "90b557d2b00b07944db7528e9b8891d7",
     "packages": [
         {
             "name": "brick/math",
@@ -134,6 +134,57 @@
                 }
             ],
             "time": "2024-02-09T16:56:22+00:00"
+        },
+        {
+            "name": "devmuhammad/company-email-validator",
+            "version": "v1.0.2",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/devMuhammad05/company-email-validator.git",
+                "reference": "60510bcacdd20319401c609a225d876c7c17ced6"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/devMuhammad05/company-email-validator/zipball/60510bcacdd20319401c609a225d876c7c17ced6",
+                "reference": "60510bcacdd20319401c609a225d876c7c17ced6",
+                "shasum": ""
+            },
+            "require": {
+                "php": "^8.2"
+            },
+            "require-dev": {
+                "pestphp/pest": "3.x-dev"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "Muhammad\\CompanyEmailValidator\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Muhammad Yahaya",
+                    "email": "adelekeyahaya05@gmail.com"
+                }
+            ],
+            "description": "A fast and efficient company/work email validator that checks if an email domain belongs to a free email provider.",
+            "keywords": [
+                "business email validator",
+                "company email validator",
+                "email domain validator",
+                "email validator",
+                "php",
+                "work email validator"
+            ],
+            "support": {
+                "issues": "https://github.com/devMuhammad05/company-email-validator/issues",
+                "source": "https://github.com/devMuhammad05/company-email-validator/tree/v1.0.2"
+            },
+            "time": "2025-03-15T14:06:22+00:00"
         },
         {
             "name": "dflydev/dot-access-data",

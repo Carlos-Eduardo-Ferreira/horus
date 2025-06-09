@@ -10,13 +10,16 @@ export function validateUserForm(fields: DynamicFormField[], role?: string) {
   const passwordField = fields.find(f => f.name === "password");
   const isEditMode = passwordField ? !passwordField.required : true;
   const normalizedRole = (role ?? "").toString().toLowerCase();
-  const isCompany = isEditMode && normalizedRole === "company";
+  const isCompany = normalizedRole === "company";
 
   if (!isCompany && !String(name).trim()) {
     errors.name = "O nome é obrigatório";
   }
 
-  if (String(email).trim() && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(email))) {
+  // Email agora é obrigatório para todos os tipos de usuário
+  if (!String(email).trim()) {
+    errors.email = "O email é obrigatório";
+  } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(email))) {
     errors.email = "Digite um email válido";
   }
 

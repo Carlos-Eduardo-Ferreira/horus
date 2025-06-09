@@ -1,61 +1,58 @@
-export function validateRegisterForm(
-  form: {
-    name: string;
-    email: string;
-    document: string;
-    password: string;
-    password_confirmation: string;
-  },
-  userType: 'consumer' | 'company'
-) {
-  const errors: {
-    name?: string;
-    email?: string;
-    document?: string;
-    password?: string;
-    password_confirmation?: string;
-  } = {};
+interface RegisterForm {
+  name: string;
+  legal_name?: string;
+  email: string;
+  document: string;
+  password: string;
+  password_confirmation: string;
+}
 
-  const cleanedDocument = form.document.replace(/\D/g, '');
+export function validateRegisterForm(form: RegisterForm, userType: 'consumer' | 'company') {
+  const errors: { [key: string]: string } = {};
 
-  // Validações específicas para consumidor (pessoa física)
+  // Validação do nome
   if (userType === 'consumer') {
     if (!form.name.trim()) {
-      errors.name = 'O nome é obrigatório';
+      errors.name = "O nome é obrigatório";
     }
+  }
+  // Para empresa, nome e legal_name são preenchidos automaticamente via API
 
-    if (!form.email.trim()) {
-      errors.email = 'O e-mail é obrigatório';
-    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email)) {
-      errors.email = 'Digite um e-mail válido';
-    }
+  // Validação do email (obrigatório para ambos os tipos)
+  if (!form.email.trim()) {
+    errors.email = "O e-mail é obrigatório";
+  } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email)) {
+    errors.email = "Digite um email válido";
+  }
 
-    if (!cleanedDocument) {
-      errors.document = 'O CPF é obrigatório';
-    } else if (cleanedDocument.length !== 11) {
-      errors.document = 'O CPF deve ter 11 dígitos';
-    }
-  } 
-  // Validações para empresa (pessoa jurídica)
-  else if (userType === 'company') {
-    if (!cleanedDocument) {
-      errors.document = 'O CNPJ é obrigatório';
-    } else if (cleanedDocument.length !== 14) {
-      errors.document = 'O CNPJ deve ter 14 dígitos';
+  // Validação do documento
+  if (!form.document.trim()) {
+    errors.document = userType === 'consumer' ? "O CPF é obrigatório" : "O CNPJ é obrigatório";
+  } else {
+    const cleanDocument = form.document.replace(/\D/g, '');
+    if (userType === 'consumer') {
+      if (cleanDocument.length !== 11) {
+        errors.document = "O CPF deve ter exatamente 11 dígitos";
+      }
+    } else {
+      if (cleanDocument.length !== 14) {
+        errors.document = "O CNPJ deve ter exatamente 14 dígitos";
+      }
     }
   }
 
-  // Validações comuns para ambos os tipos
-  if (!form.password) {
-    errors.password = 'A senha é obrigatória';
+  // Validação da senha
+  if (!form.password.trim()) {
+    errors.password = "A senha é obrigatória";
   } else if (form.password.length < 8) {
-    errors.password = 'A senha deve ter pelo menos 8 caracteres';
+    errors.password = "A senha deve ter pelo menos 8 caracteres";
   }
 
-  if (!form.password_confirmation) {
-    errors.password_confirmation = 'A confirmação de senha é obrigatória';
+  // Validação da confirmação de senha
+  if (!form.password_confirmation.trim()) {
+    errors.password_confirmation = "A confirmação de senha é obrigatória";
   } else if (form.password !== form.password_confirmation) {
-    errors.password_confirmation = 'As senhas não coincidem';
+    errors.password_confirmation = "As senhas não coincidem";
   }
 
   return errors;

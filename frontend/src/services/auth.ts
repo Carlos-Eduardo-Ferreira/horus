@@ -6,6 +6,7 @@ interface LoginResponse { user: User; token: string }
 
 interface RegisterCredentials {
   name?: string;
+  legal_name?: string;
   email?: string;
   document: string;
   password: string;

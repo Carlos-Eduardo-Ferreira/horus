@@ -1,11 +1,12 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 import { Loader2 } from 'lucide-react'
 import axios from 'axios'
 import { formatField } from '@/utils/fieldFormatters'
 import { authService } from '@/services/auth'
+import { cnpjService } from '@/services/cnpjService'
 import { validateRegisterForm } from '@/validators/registerValidator'
 import LabeledInput from '@/components/LabeledInput'
 import Title from '@/components/Title'
@@ -20,6 +21,7 @@ type UserType = 'consumer' | 'company' | null;
 // Tipagem para possíveis erros de campo
 interface FieldErrors {
   name?: string;
+  legal_name?: string;
   email?: string;
   document?: string;
   password?: string;
@@ -34,6 +36,7 @@ export default function RegisterPage() {
   const [userType, setUserType] = useState<UserType>(null);
   const [form, setForm] = useState({
     name: '',
+    legal_name: '',
     email: '',
     document: '',
     password: '',
@@ -45,11 +48,16 @@ export default function RegisterPage() {
   const [globalError, setGlobalError] = useState('');
   const [loading, setLoading] = useState(false);
   const [hasSubmitted, setHasSubmitted] = useState(false);
+  const [cnpjLoading, setCnpjLoading] = useState(false);
+  const [cnpjError, setCnpjError] = useState<string | null>(null);
+  const cnpjLoadingRef = useRef(setCnpjLoading);
+  cnpjLoadingRef.current = setCnpjLoading;
 
   const handleUserTypeSelect = (type: UserType) => {
     setUserType(type);
     setForm({
       name: '',
+      legal_name: '',
       email: '',
       document: '',
       password: '',
@@ -58,6 +66,39 @@ export default function RegisterPage() {
     setFieldErrors({});
     setGlobalError('');
     setHasSubmitted(false);
+    setCnpjLoading(false);
+    setCnpjError(null);
+  };
+
+  const handleCnpjAutoFill = async (cnpj: string) => {
+    const cleanCnpj = cnpj.replace(/\D/g, '');
+    
+    if (cleanCnpj.length !== 14) {
+      return;
+    }
+
+    setCnpjError(null);
+    cnpjLoadingRef.current(true);
+
+    try {
+      const data = await cnpjService.fetchCompany(cleanCnpj);
+      
+      if (data && (data.nome || data.fantasia)) {
+        setForm(prev => ({
+          ...prev,
+          name: data.fantasia || data.nome || '',
+          legal_name: data.nome || ''
+        }));
+      }
+    } catch (error) {
+      if (error instanceof Error) {
+        setCnpjError(error.message);
+      } else {
+        setCnpjError('Erro ao consultar CNPJ. Verifique se a informação está correta.');
+      }
+    } finally {
+      cnpjLoadingRef.current(false);
+    }
   };
 
   const handleDocumentChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -67,6 +108,17 @@ export default function RegisterPage() {
     
     const updated = { ...form, document: formattedValue };
     setForm(updated);
+
+    if (userType === 'company' && cnpjError) {
+      setCnpjError(null);
+    }
+
+    if (userType === 'company') {
+      const cleanValue = formattedValue.replace(/\D/g, '');
+      if (cleanValue.length === 14) {
+        handleCnpjAutoFill(cleanValue);
+      }
+    }
     
     // Se já tentou enviar, revalida o campo conforme digita
     if (hasSubmitted && userType) {
@@ -79,6 +131,8 @@ export default function RegisterPage() {
     
     if (field === 'email') {
       formattedValue = value.toLowerCase();
+    } else if (field === 'name') {
+      formattedValue = formatField('uppercase', value);
     }
     
     const updated = { ...form, [field]: formattedValue };
@@ -94,6 +148,10 @@ export default function RegisterPage() {
     e.preventDefault();
     
     if (!userType) return;
+
+    if (cnpjLoading) {
+      return;
+    }
     
     setHasSubmitted(true);
     
@@ -103,7 +161,7 @@ export default function RegisterPage() {
       setFieldErrors(errors);
       
       // Foca no primeiro campo que estiver inválido
-      for (const field of ['name', 'document', 'email', 'password', 'password_confirmation']) {
+      for (const field of ['name', 'legal_name', 'document', 'email', 'password', 'password_confirmation']) {
         if (errors[field as keyof FieldErrors]) {
           document.getElementById(field)?.focus();
           break;
@@ -211,6 +269,9 @@ export default function RegisterPage() {
     );
   }
 
+  // Verifica se deve bloquear o botão de envio
+  const isSubmitDisabled = loading || cnpjLoading;
+
   return (
     <>
       <div className="mb-6">
@@ -269,35 +330,76 @@ export default function RegisterPage() {
                   error={hasSubmitted ? fieldErrors.document : undefined}
                 />
               </div>
+            </>
+          ) : (
+            <>
+              <div>
+                <LabeledInput
+                  mutedBackground
+                  id="document"
+                  title="CNPJ"
+                  type="text"
+                  tabIndex={1}
+                  value={form.document}
+                  onChange={handleDocumentChange}
+                  maxLength={18}
+                  error={hasSubmitted ? fieldErrors.document : undefined}
+                />
+                {cnpjLoading && (
+                  <div className="flex items-center text-xs mt-1 ml-1 text-blue-600">
+                    <div className="animate-spin rounded-full h-3 w-3 border-b border-blue-600 mr-1"></div>
+                    Buscando empresa...
+                  </div>
+                )}
+                {cnpjError && (
+                  <div className="text-xs mt-1 ml-1 text-orange-600">
+                    {cnpjError}
+                  </div>
+                )}
+              </div>
 
               <div>
                 <LabeledInput
                   mutedBackground
-                  id="email"
-                  title="Endereço de e-mail"
-                  type="email"
+                  id="name"
+                  title="Nome Fantasia"
+                  type="text"
+                  tabIndex={2}
+                  value={form.name}
+                  onChange={e => handleInputChange('name', e.target.value)}
+                  error={hasSubmitted ? fieldErrors.name : undefined}
+                  disabled={true}
+                />
+              </div>
+
+              <div>
+                <LabeledInput
+                  mutedBackground
+                  id="legal_name"
+                  title="Razão Social"
+                  type="text"
                   tabIndex={3}
-                  value={form.email}
-                  onChange={e => handleInputChange('email', e.target.value)}
-                  error={hasSubmitted ? fieldErrors.email : undefined}
+                  value={form.legal_name}
+                  onChange={e => handleInputChange('legal_name', e.target.value)}
+                  error={hasSubmitted ? fieldErrors.legal_name : undefined}
+                  disabled={true}
                 />
               </div>
             </>
-          ) : (
-            <div>
-              <LabeledInput
-                mutedBackground
-                id="document"
-                title="CNPJ"
-                type="text"
-                tabIndex={1}
-                value={form.document}
-                onChange={handleDocumentChange}
-                maxLength={18}
-                error={hasSubmitted ? fieldErrors.document : undefined}
-              />
-            </div>
           )}
+
+          <div>
+            <LabeledInput
+              mutedBackground
+              id="email"
+              title="Endereço de e-mail"
+              type="email"
+              tabIndex={userType === 'consumer' ? 3 : 4}
+              value={form.email}
+              onChange={e => handleInputChange('email', e.target.value)}
+              error={hasSubmitted ? fieldErrors.email : undefined}
+            />
+          </div>
 
           <div>
             <LabeledInput
@@ -305,7 +407,7 @@ export default function RegisterPage() {
               id="password"
               title="Senha"
               type="password"
-              tabIndex={userType === 'consumer' ? 4 : 2}
+              tabIndex={userType === 'consumer' ? 4 : 5}
               value={form.password}
               onChange={e => handleInputChange('password', e.target.value)}
               error={hasSubmitted ? fieldErrors.password : undefined}
@@ -318,7 +420,7 @@ export default function RegisterPage() {
               id="password_confirmation"
               title="Confirmar senha"
               type="password"
-              tabIndex={userType === 'consumer' ? 5 : 3}
+              tabIndex={userType === 'consumer' ? 5 : 6}
               value={form.password_confirmation}
               onChange={e => handleInputChange('password_confirmation', e.target.value)}
               error={hasSubmitted ? fieldErrors.password_confirmation : undefined}
@@ -330,12 +432,12 @@ export default function RegisterPage() {
           type="submit" 
           variant="primary" 
           className="w-full"
-          disabled={loading}
+          disabled={isSubmitDisabled}
         >
-          {loading ? (
+          {isSubmitDisabled ? (
             <span className="inline-flex items-center">
               <Loader2 className="animate-spin h-4 w-4 mr-2" />
-              Criando conta...
+              {cnpjLoading ? 'Aguarde...' : 'Criando conta...'}
             </span>
           ) : (
             'Criar conta'

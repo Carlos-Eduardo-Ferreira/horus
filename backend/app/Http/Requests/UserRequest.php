@@ -4,6 +4,7 @@ namespace App\Http\Requests;
 
 use App\Models\User;
 use App\Rules\DocumentRule;
+use App\Rules\BusinessEmailRule;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
@@ -52,19 +53,22 @@ class UserRequest extends FormRequest
         }
 
         $rules = [
-            'name' => ($isUpdate && $role === 'company')
-                ? ['nullable', 'string', 'max:255']
-                : ['required', 'string', 'max:255'],
+            'name' => ['required', 'string', 'max:255'],
             'legal_name' => ($isUpdate && $role === 'company')
-                ? ['nullable', 'string', 'max:255']
+                ? ['required', 'string', 'max:255']
                 : ['nullable', 'string', 'max:255'],
             'email' => [
-                'nullable',
+                'required',
                 'email',
                 'max:255',
                 Rule::unique('users', 'email')->ignore($id),
             ],
         ];
+
+        // Adiciona validação de email corporativo para empresas
+        if ($isUpdate && $role === 'company') {
+            $rules['email'][] = new BusinessEmailRule();
+        }
 
         if ($isUpdate && $role === 'company') {
             $rules['document'] = [
@@ -111,7 +115,9 @@ class UserRequest extends FormRequest
         }
 
         return [
-            'name.required' => ($isUpdate && $role === 'company') ? '' : 'O nome é obrigatório',
+            'name.required' => 'O nome é obrigatório',
+            'legal_name.required' => 'A razão social é obrigatória para empresas',
+            'email.required' => 'O email é obrigatório',
             'email.email' => 'Digite um email válido',
             'email.unique' => 'Este email já está cadastrado',
             'document.required' => $isUpdate && $role === 'company' ? 'O CNPJ é obrigatório' : 'O CPF é obrigatório',

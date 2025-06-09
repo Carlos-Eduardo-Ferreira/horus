@@ -27,6 +27,11 @@ class AuthController extends Controller
             $type = $fields['type'];
             unset($fields['type']);
 
+            // Ensure legal_name is set to null if not provided for consumers
+            if ($type === 'consumer' && !isset($fields['legal_name'])) {
+                $fields['legal_name'] = null;
+            }
+
             $user = User::create($fields);
 
             $role = Role::where('identifier', $type)->firstOrFail();

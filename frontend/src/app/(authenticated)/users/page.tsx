@@ -13,7 +13,7 @@ export default function UsersPage() {
     { key: "email", label: "Email", widthPercent: 15, align: "left", sortable: true },
     { 
       key: "document", 
-      label: "CPF", 
+      label: "Nº Documento", 
       widthPercent: 10, 
       align: "center", 
       sortable: true,
@@ -28,7 +28,7 @@ export default function UsersPage() {
 
   const filterFields: FilterField[] = [
     { name: "name", label: "Nome", type: "text", formatter: "uppercase" },
-    { name: "document", label: "CPF", type: "text", formatter: "cpf" }
+    { name: "document", label: "CPF/CNPJ", type: "text", formatter: "cpfcnpj" }
   ];
 
   const canEdit = () => true;

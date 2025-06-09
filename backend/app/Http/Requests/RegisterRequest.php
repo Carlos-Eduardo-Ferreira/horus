@@ -4,7 +4,8 @@ namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
 use App\Rules\DocumentRule;
-use App\Rules\AuthRequiredRule;
+use App\Rules\LegalNameRequiredRule;
+use App\Rules\BusinessEmailRule;
 
 class RegisterRequest extends FormRequest
 {
@@ -16,8 +17,9 @@ class RegisterRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'name' => ['nullable', 'string', 'max:255', new AuthRequiredRule],
-            'email' => ['nullable', 'string', 'email', 'max:255', 'unique:users', new AuthRequiredRule],
+            'name' => ['required', 'string', 'max:255'],
+            'legal_name' => ['nullable', 'string', 'max:255', new LegalNameRequiredRule],
+            'email' => ['required', 'string', 'email', 'max:255', 'unique:users', new BusinessEmailRule],
             'password' => ['required', 'string', 'min:8', 'confirmed'],
             'type' => ['required', 'string', 'in:consumer,company'],
             'document' => ['required', 'string', 'unique:users,document', new DocumentRule],

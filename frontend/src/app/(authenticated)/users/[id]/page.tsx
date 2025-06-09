@@ -117,7 +117,7 @@ export default function UserFormPage() {
                   type: "email",
                   col: 1,
                   value: String(userData?.email ?? ""),
-                  required: false,
+                  required: true,
                 },
                 {
                   name: "password",
@@ -163,7 +163,7 @@ export default function UserFormPage() {
                   type: "email",
                   col: 1,
                   value: String(userData?.email ?? ""),
-                  required: false,
+                  required: true,
                 },
                 {
                   name: "password",
