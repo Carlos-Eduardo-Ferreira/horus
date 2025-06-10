@@ -1,6 +1,7 @@
 "use client";
 
 import { useGlobalHook } from "@/hooks/global.hook";
+import { useUserRole } from "@/hooks/useUserRole";
 import { AnimatePresence, motion } from "framer-motion";
 import { useRouter, usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
@@ -8,17 +9,27 @@ import { CgClose } from "react-icons/cg";
 import { MdOutlineKeyboardArrowDown } from "react-icons/md";
 import { Tooltip as ReactTooltip } from "react-tooltip";
 import { SubMenu } from "../Submenu";
-import { IMenuSideBarProps, menuSideBarItem } from "./data";
+import { IMenuSideBarProps } from "./types";
+import { getMenuByRole } from "./menuFactory";
+import { route } from "@/config/namedRoutes";
 import Image from "next/image";
 
 const iconSize = 20;
 
 const SidebarMenu = () => {
   const { isMenuOpen, toggleMenu } = useGlobalHook();
+  const { userRole, isLoading } = useUserRole();
   const [openSubMenu, setOpenSubMenu] = useState<number | null>(null);
   const [initialRender, setInitialRender] = useState(true);
+  const [menuItems, setMenuItems] = useState<IMenuSideBarProps[]>([]);
   const router = useRouter();
   const pathname = usePathname();
+
+  useEffect(() => {
+    if (!isLoading && userRole) {
+      setMenuItems(getMenuByRole(userRole));
+    }
+  }, [userRole, isLoading]);
 
   const isItemActive = (item: IMenuSideBarProps): boolean => {
     if (!item.subMenu && item.path && pathname === item.path) {
@@ -37,8 +48,8 @@ const SidebarMenu = () => {
   useEffect(() => {
     setInitialRender(false);
 
-    if (pathname) {
-      const activeSubMenuIndex = menuSideBarItem.findIndex((item) =>
+    if (pathname && menuItems.length > 0) {
+      const activeSubMenuIndex = menuItems.findIndex((item) =>
         item.subMenuItems?.some((subItem) => subItem.path && pathname.startsWith(subItem.path))
       );
 
@@ -46,7 +57,7 @@ const SidebarMenu = () => {
         setOpenSubMenu(activeSubMenuIndex);
       }
     }
-  }, [pathname]);
+  }, [pathname, menuItems]);
 
   const toggleSubMenu = (index: number) => {
     setOpenSubMenu(openSubMenu === index ? null : index);
@@ -57,6 +68,10 @@ const SidebarMenu = () => {
       setOpenSubMenu(null);
     }
   }, [isMenuOpen]);
+
+  const handleNavigation = (path: string) => {
+    router.push(path);
+  };
 
   const sidebarVariants = {
     open: {
@@ -81,6 +96,10 @@ const SidebarMenu = () => {
       transition: { type: "tween", duration: 0.3 },
     },
   };
+
+  if (isLoading) {
+    return null;
+  }
 
   return (
     <motion.div
@@ -107,6 +126,7 @@ const SidebarMenu = () => {
           className="py-4 cursor-pointer"
           style={{ width: isMenuOpen ? "150px" : "44px", height: "64px" }}
           priority
+          onClick={() => handleNavigation(route('dashboard'))}
         />
         <button className="md:hidden pb-4 color-side-bar-item">
           <CgClose
@@ -118,7 +138,7 @@ const SidebarMenu = () => {
       </div>
       <hr className="w-[85%] mx-auto border-gray-700" />
       <div className="flex flex-col h-full gap-4 items-center relative justify-start px-4 mt-5">
-        {menuSideBarItem.map((item: IMenuSideBarProps, index: number) => {
+        {menuItems.map((item: IMenuSideBarProps, index: number) => {
           const isActive = isItemActive(item);
 
           return (
@@ -135,7 +155,7 @@ const SidebarMenu = () => {
                   item.subMenu
                     ? toggleSubMenu(index)
                     : item.path
-                    ? router.push(item.path)
+                    ? handleNavigation(item.path)
                     : undefined
                 }
               >

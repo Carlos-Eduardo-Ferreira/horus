@@ -8,6 +8,7 @@ import { formatField } from '@/utils/fieldFormatters'
 import { authService } from '@/services/auth'
 import { cnpjService } from '@/services/cnpjService'
 import { validateRegisterForm } from '@/validators/registerValidator'
+import { getDefaultDashboard } from '@/config/routes'
 import LabeledInput from '@/components/LabeledInput'
 import Title from '@/components/Title'
 import TextLink from '@/components/TextLink'
@@ -15,6 +16,8 @@ import Text from '@/components/Text'
 import Button from '@/components/Button'
 import { IoIosArrowBack } from 'react-icons/io'
 import { usePageTitle } from '@/hooks/usePageTitle'
+import { UserRole } from '@/types/auth'
+import { useAuthContext } from '@/context/auth.context'
 
 type UserType = 'consumer' | 'company' | null;
 
@@ -144,6 +147,8 @@ export default function RegisterPage() {
     }
   };
 
+  const { loadUser } = useAuthContext();
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
@@ -189,8 +194,12 @@ export default function RegisterPage() {
       localStorage.setItem('token', token);
       localStorage.setItem('user', JSON.stringify(user));
       
-      // Redireciona para dashboard
-      router.push('/dashboard');
+      // Recarrega o usuário no contexto de autenticação
+      await loadUser();
+      
+      // Redireciona baseado na role do usuário
+      const defaultDashboard = getDefaultDashboard(user.role as UserRole);
+      router.replace(defaultDashboard);
     } catch (error: unknown) {
       setLoading(false);
       

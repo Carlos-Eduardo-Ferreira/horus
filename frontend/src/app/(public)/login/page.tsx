@@ -7,12 +7,15 @@ import { Loader2 } from 'lucide-react';
 import { formatField } from '@/utils/fieldFormatters';
 import { authService } from '@/services/auth';
 import { validateLoginForm } from '@/validators/loginValidator';
+import { getDefaultDashboard } from '@/config/routes';
 import LabeledInput from '@/components/LabeledInput';
 import Title from '@/components/Title';
 import Button from '@/components/Button';
 import Text from '@/components/Text';
 import TextLink from '@/components/TextLink';
 import { usePageTitle } from '@/hooks/usePageTitle';
+import { UserRole } from '@/types/auth';
+import { useAuthContext } from '@/context/auth.context';
 
 // Tipagem para possíveis erros de campo
 interface FieldErrors { document?: string; password?: string }
@@ -22,6 +25,7 @@ export default function LoginPage() {
   usePageTitle('Login');
   
   const router = useRouter();
+  const { loadUser } = useAuthContext();
 
   // Estado para armazenar dados do formulário
   const [form, setForm] = useState({ document: '', password: '' });
@@ -88,8 +92,12 @@ export default function LoginPage() {
       localStorage.setItem('token', token);
       localStorage.setItem('user', JSON.stringify(user));
 
-      // Redireciona para dashboard
-      router.push('/dashboard');
+      // Recarrega o usuário no contexto de autenticação
+      await loadUser();
+
+      // Redireciona baseado na role do usuário
+      const defaultDashboard = getDefaultDashboard(user.role as UserRole);
+      router.replace(defaultDashboard);
     } catch (error: unknown) {
       setLoading(false);
 

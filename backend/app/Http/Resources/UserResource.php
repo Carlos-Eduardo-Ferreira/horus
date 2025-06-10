@@ -11,7 +11,7 @@ class UserResource extends JsonResource
         // Sempre retorna o identifier da role principal
         $role = $this->roles()->first();
 
-        return [
+        $data = [
             'id' => $this->id,
             'name' => $this->name ?? '',
             'legal_name' => $this->legal_name ?? '',
@@ -19,5 +19,13 @@ class UserResource extends JsonResource
             'document' => $this->document,
             'role' => $role->identifier,
         ];
+
+        // Adiciona informações de verificação apenas para empresas
+        if ($this->isCompany()) {
+            $data['is_verified'] = $this->isVerifiedCompany();
+            $data['verification_status'] = $this->getCompanyVerificationStatus();
+        }
+
+        return $data;
     }
 }

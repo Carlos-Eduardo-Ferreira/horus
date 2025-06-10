@@ -9,7 +9,7 @@ use App\Http\Resources\UserResource;
 use App\Http\Requests\UserRequest;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
-use App\Helpers\StringHelper;
+use Illuminate\Database\QueryException;
 
 class UserController extends Controller
 {
@@ -22,17 +22,33 @@ class UserController extends Controller
         }
 
         if ($request->document) {
-            $query->where('document', 'like', '%' . $request->document . '%');
+            $cleanDocument = preg_replace('/[^0-9]/', '', $request->document);
+            $query->where('document', 'like', '%' . $cleanDocument . '%');
         }
 
-        $sortBy = $request->get('sort_by', 'name');
+        if ($request->role) {
+            $query->whereHas('roles', function ($q) use ($request) {
+                $q->where('identifier', $request->role);
+            });
+        }
+
         $sortOrder = $request->get('sort_order', 'asc');
+        $sortOrder = $sortOrder === 'desc' ? 'desc' : 'asc';
 
-        if (!in_array($sortBy, ['name', 'id'])) {
-            $sortBy = 'name';
-        }
-
-        $query->orderBy($sortBy, $sortOrder === 'desc' ? 'desc' : 'asc');
+        $query->leftJoin('user_roles', 'users.id', '=', 'user_roles.user_id')
+              ->leftJoin('roles', 'user_roles.role_id', '=', 'roles.id')
+              ->select('users.*')
+              ->orderByRaw("
+                  CASE roles.identifier 
+                      WHEN 'master' THEN 1
+                      WHEN 'admin' THEN 2  
+                      WHEN 'user' THEN 3
+                      WHEN 'consumer' THEN 4
+                      WHEN 'company' THEN 5
+                      ELSE 6
+                  END
+              ")
+              ->orderBy('users.name', $sortOrder);
 
         return UserResource::collection($query->paginate(50));
     }
@@ -49,7 +65,7 @@ class UserController extends Controller
             DB::beginTransaction();
 
             $data = $request->validated();
-            $data['document'] = StringHelper::onlyNumbers($data['document']);
+            $data['document'] = preg_replace('/[^0-9]/', '', $data['document']);
             
             // Remove password_confirmation do array de dados
             unset($data['password_confirmation']);
@@ -86,7 +102,7 @@ class UserController extends Controller
         } catch (\Throwable $e) {
             DB::rollBack();
             
-            if ($e instanceof \Illuminate\Database\QueryException && $e->errorInfo[1] === 1062) {
+            if ($e instanceof QueryException && $e->errorInfo[1] === 1062) {
                 return response()->json([
                     'message' => 'Erro de validação',
                     'errors' => [

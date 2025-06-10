@@ -2,7 +2,7 @@ import { useGlobalHook } from "@/hooks/global.hook";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { MdOutlineKeyboardArrowDown } from "react-icons/md";
-import { IMenuSideBarProps } from "./SidebarMenu/data";
+import { IMenuSideBarProps } from "./SidebarMenu/types";
 
 interface ISubMenuProps {
   isMenuOpened: boolean;

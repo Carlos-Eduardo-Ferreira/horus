@@ -13,7 +13,11 @@ Route::get('/cnpj/{cnpj}', [\App\Http\Controllers\CnpjProxyController::class, 'f
 // Rotas protegidas
 Route::middleware('auth:sanctum')->group(function () {
     Route::get('/me', function (Request $request) {
-        return new UserResource($request->user());
+        $user = $request->user();
+        $user->load('roles');
+        return response()->json([
+            'user' => new UserResource($user)
+        ]);
     });
     Route::post('/logout', [AuthController::class, 'logout']);
 

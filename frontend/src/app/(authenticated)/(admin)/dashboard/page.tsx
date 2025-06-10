@@ -14,7 +14,7 @@ export default function DashboardPage() {
           Dashboard
         </Title>
         <p className="text-lg text-gray-600 mb-8">
-          conteúdo do dashboard
+          admin dashboard
         </p>
       </div>
     </section>

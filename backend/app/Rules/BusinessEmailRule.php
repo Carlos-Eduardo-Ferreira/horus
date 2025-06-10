@@ -28,6 +28,7 @@ class BusinessEmailRule implements ValidationRule
             return;
         }
 
+        // Primeiro valida se é um email básico válido
         if (!filter_var($value, FILTER_VALIDATE_EMAIL)) {
             $fail('O e-mail informado é inválido.');
             return;

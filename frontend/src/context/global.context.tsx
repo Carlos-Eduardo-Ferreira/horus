@@ -19,21 +19,20 @@ const GlobalContext = createContext<IGlobalContextProviderProps>(
 
 const GlobalContextProvider = ({ children }: IGlobalContextProps) => {
   const [isMenuOpen, setIsMenuOpen] = useState(true);
+  const [isMounted, setIsMounted] = useState(false);
   
   useEffect(() => {
-    // Verifica se é um dispositivo móvel no carregamento inicial
+    setIsMounted(true);
+    
     const checkIfMobile = () => {
-      const isMobile = window.innerWidth < 768; // breakpoint md do Tailwind
-      setIsMenuOpen(!isMobile); // menu aberto no desktop, fechado no mobile
+      const isMobile = window.innerWidth < 768;
+      setIsMenuOpen(!isMobile);
     };
     
-    // Verifica no carregamento da página
     checkIfMobile();
     
-    // Adiciona listener para redimensionamento da janela
     window.addEventListener('resize', checkIfMobile);
     
-    // Cleanup
     return () => window.removeEventListener('resize', checkIfMobile);
   }, []);
 
@@ -41,8 +40,15 @@ const GlobalContextProvider = ({ children }: IGlobalContextProps) => {
   const closeMenu = () => setIsMenuOpen(false);
   const openMenu = () => setIsMenuOpen(true);
 
+  const contextValue = {
+    isMenuOpen: isMounted ? isMenuOpen : true,
+    toggleMenu,
+    closeMenu,
+    openMenu,
+  };
+
   return (
-    <GlobalContext.Provider value={{ isMenuOpen, toggleMenu, closeMenu, openMenu }}>
+    <GlobalContext.Provider value={contextValue}>
       {children}
     </GlobalContext.Provider>
   );

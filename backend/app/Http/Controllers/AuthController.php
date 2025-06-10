@@ -2,72 +2,20 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\User;
-use App\Models\Role;
-use App\Models\UserRole;
 use App\Http\Requests\LoginRequest;
 use App\Http\Requests\RegisterRequest;
-use App\Helpers\StringHelper;
+use App\Http\Resources\UserResource;
+use App\Models\Role;
+use App\Models\User;
+use App\Models\UserRole;
+use App\Models\CompanyValidation;
+use App\Enums\CompanyValidationStatus;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Http\Request;
-use App\Http\Resources\UserResource;
-use Illuminate\Database\QueryException;
 
 class AuthController extends Controller
 {
-    public function register(RegisterRequest $request)
-    {
-        try {
-            DB::beginTransaction();
-
-            $fields = $request->validated();
-            $fields['document'] = StringHelper::onlyNumbers($fields['document']);
-
-            $type = $fields['type'];
-            unset($fields['type']);
-
-            // Ensure legal_name is set to null if not provided for consumers
-            if ($type === 'consumer' && !isset($fields['legal_name'])) {
-                $fields['legal_name'] = null;
-            }
-
-            $user = User::create($fields);
-
-            $role = Role::where('identifier', $type)->firstOrFail();
-
-            UserRole::create([
-                'user_id' => $user->id,
-                'role_id' => $role->id,
-                'local_unit_id' => 1
-            ]);
-
-            $token = $user->createToken($user->document)->plainTextToken;
-
-            DB::commit();
-
-            return response()->json([
-                'user' => new UserResource($user),
-                'token' => $token
-            ]);
-        } catch (\Throwable $e) {
-            DB::rollBack();
-
-            if ($e instanceof QueryException && $e->errorInfo[1] === 1062) {
-                return response()->json([
-                    'message' => 'Erro de validação',
-                    'errors' => [
-                        'document' => ['Este documento já está cadastrado no sistema']
-                    ]
-                ], 422);
-            }
-
-            return response()->json([
-                'message' => 'Não foi possível completar o cadastro. Tente novamente mais tarde.'
-            ], 500);
-        }
-    }
-
     public function login(LoginRequest $request)
     {
         $user = User::where('document', $request->document)->first();
@@ -78,6 +26,7 @@ class AuthController extends Controller
             ], 401);
         }
 
+        $user->load('roles');
         $token = $user->createToken($user->document)->plainTextToken;
 
         return response()->json([
@@ -86,9 +35,66 @@ class AuthController extends Controller
         ]);
     }
 
+    public function register(RegisterRequest $request)
+    {
+        try {
+            DB::beginTransaction();
+
+            $data = $request->validated();
+            
+            // Pega o tipo de usuário
+            $userType = $data['type'] ?? 'consumer';
+            
+            // Remove campos que não são do modelo User
+            unset($data['password_confirmation']);
+            unset($data['type']);
+
+            $user = User::create($data);
+
+            // Determina a role baseada no tipo de usuário
+            $roleIdentifier = match($userType) {
+                'company' => 'company',
+                'consumer' => 'consumer',
+                default => 'consumer'
+            };
+
+            // Associar role baseada no tipo
+            $role = Role::where('identifier', $roleIdentifier)->firstOrFail();
+            UserRole::create([
+                'user_id' => $user->id,
+                'role_id' => $role->id,
+                'local_unit_id' => 1
+            ]);
+
+            // Se for empresa, cria registro em company_validations
+            if ($userType === 'company') {
+                CompanyValidation::create([
+                    'user_id' => $user->id,
+                    'status' => CompanyValidationStatus::NOT_SUBMITTED,
+                ]);
+            }
+
+            $user->load('roles');
+            $token = $user->createToken($user->document)->plainTextToken;
+
+            DB::commit();
+
+            return response()->json([
+                'user' => new UserResource($user),
+                'token' => $token
+            ], 201);
+        } catch (\Throwable $e) {
+            DB::rollBack();
+            
+            return response()->json([
+                'message' => 'Não foi possível criar a conta'
+            ], 500);
+        }
+    }
+
     public function logout(Request $request)
     {
-        $request->user()->currentAccessToken()->delete();
+        $request->user()->tokens()->delete();
 
         return response()->json([
             'message' => 'Logout realizado com sucesso'

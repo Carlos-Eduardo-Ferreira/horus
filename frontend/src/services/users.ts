@@ -49,7 +49,7 @@ export const usersService = {
     const params = {
       page,
       ...validFilters,
-      ...(sort && { sort_by: sort.sortBy, sort_order: sort.sortOrder })
+      ...(sort && sort.sortBy === 'name' && { sort_by: sort.sortBy, sort_order: sort.sortOrder })
     };
     
     const { data } = await axios.get<PaginatedResponse<User>>('/api/users', {

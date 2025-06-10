@@ -2,6 +2,7 @@
 
 namespace Database\Seeders;
 
+use App\Enums\CompanyValidationStatus;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\DB;
@@ -88,6 +89,20 @@ class UserSeeder extends Seeder
                         'role_id' => $roleId,
                     ],
                     [
+                        'created_at' => $now,
+                        'updated_at' => $now,
+                    ]
+                );
+            }
+
+            // Cria company_validation para empresas
+            if ($user['role_identifier'] === 'company' && $userId) {
+                DB::table('company_validations')->updateOrInsert(
+                    ['user_id' => $userId],
+                    [
+                        'status' => CompanyValidationStatus::NOT_SUBMITTED->value,
+                        'validated_at' => null,
+                        'rejection_reason' => null,
                         'created_at' => $now,
                         'updated_at' => $now,
                     ]

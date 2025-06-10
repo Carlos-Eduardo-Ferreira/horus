@@ -11,7 +11,7 @@ import { cn } from "@/utils/classNames";
 function getResponsiveMaxColsPerRow(width: number): number {
   if (width >= 1900) return 6;
   if (width >= 1400) return 4;
-  if (width >= 1000) return 2;
+  if (width >= 1000) return 3;
   return 1;
 }
 

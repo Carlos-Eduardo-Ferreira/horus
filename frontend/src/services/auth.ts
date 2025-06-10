@@ -1,44 +1,49 @@
-import axios from 'axios';
+import axios from "axios";
+import { User } from "@/types/auth";
 
-interface LoginCredentials { document: string; password: string }
-interface User { id: number; name: string; email: string; type?: string; document: string; role: string }
-interface LoginResponse { user: User; token: string }
-
-interface RegisterCredentials {
-  name?: string;
-  legal_name?: string;
-  email?: string;
+export interface LoginPayload {
   document: string;
   password: string;
+}
+
+export interface RegisterPayload {
+  name: string;
+  email: string;
+  password: string;
   password_confirmation: string;
-  type: 'consumer' | 'company';
+  document: string;
+}
+
+export interface LoginResponse {
+  token: string;
+  user: User;
+}
+
+export interface CurrentUserResponse {
+  user: User;
 }
 
 export const authService = {
-  async login(credentials: LoginCredentials): Promise<LoginResponse> {
-    const { data } = await axios.post<LoginResponse>('/api/login', credentials);
-    return data;
-  },
-  
-  async register(credentials: RegisterCredentials): Promise<LoginResponse> {
-    const { data } = await axios.post<LoginResponse>('/api/register', credentials);
+  async login(payload: LoginPayload): Promise<LoginResponse> {
+    const { data } = await axios.post<LoginResponse>('/api/login', payload);
     return data;
   },
 
-  async getCurrentUser(token: string): Promise<{ user: User }> {
-    const { data } = await axios.get('/api/me', {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
+  async register(payload: RegisterPayload): Promise<LoginResponse> {
+    const { data } = await axios.post<LoginResponse>('/api/register', payload);
+    return data;
+  },
+
+  async getCurrentUser(token: string): Promise<CurrentUserResponse> {
+    const { data } = await axios.get<CurrentUserResponse>('/api/me', {
+      headers: { Authorization: `Bearer ${token}` }
     });
-    return { user: data.data };
+    return data;
   },
 
-  async logout(token: string) {
+  async logout(token: string): Promise<void> {
     await axios.post('/api/logout', {}, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
+      headers: { Authorization: `Bearer ${token}` }
     });
   }
 };

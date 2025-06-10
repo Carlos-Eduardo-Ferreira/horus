@@ -3,7 +3,6 @@
 namespace App\Rules;
 
 use Closure;
-use App\Helpers\StringHelper;
 use App\Helpers\DocumentValidator;
 use Illuminate\Contracts\Validation\ValidationRule;
 
@@ -20,7 +19,7 @@ class DocumentRule implements ValidationRule
             $type = $roleObj->value;
         }
 
-        $document = StringHelper::onlyNumbers($value);
+        $document = preg_replace('/[^0-9]/', '', $value);
 
         if ($type === 'company') {
             if (strlen($document) !== 14) {
@@ -35,19 +34,14 @@ class DocumentRule implements ValidationRule
             return;
         }
 
-        if (in_array($type, ['consumer', 'user', 'master', 'admin'], true)) {
-            if (strlen($document) !== 11) {
-                $fail('O CPF deve ter exatamente 11 dígitos.');
-                return;
-            }
-
-            if (!DocumentValidator::validateCpf($document)) {
-                $fail('O CPF informado não é válido.');
-            }
-
+        // Para consumer ou outros tipos, valida como CPF
+        if (strlen($document) !== 11) {
+            $fail('O CPF deve ter exatamente 11 dígitos.');
             return;
         }
 
-        $fail('Tipo de usuário inválido para validação de documento.');
+        if (!DocumentValidator::validateCpf($document)) {
+            $fail('O CPF informado não é válido.');
+        }
     }
 }

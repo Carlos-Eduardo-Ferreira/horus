@@ -14,10 +14,13 @@ return new class extends Migration
         Schema::create('company_validations', function (Blueprint $table) {
             $table->id();
             $table->foreignId('user_id')->constrained()->onDelete('cascade');
-            $table->enum('status', ['pending', 'approved', 'rejected'])->default('pending');
+            $table->enum('status', ['not_submitted', 'pending', 'approved', 'rejected'])->default('not_submitted');
             $table->text('rejection_reason')->nullable();
             $table->timestamp('validated_at')->nullable();
             $table->timestamps();
+
+            // Trava para garantir um único registro por usuário
+            $table->unique('user_id');
 
             // Índices úteis
             $table->index(['user_id', 'status']);

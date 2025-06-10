@@ -2,20 +2,12 @@
 
 import { ConfirmModal } from "@/components/ConfirmModal";
 import { AnimatePresence, motion } from "framer-motion";
-import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import { GoSignOut, GoPerson, GoQuestion } from "react-icons/go";
 import { ExclamationTriangleIcon } from '@heroicons/react/24/outline';
-import { authService } from "@/services/auth";
 import { getRoleLabel } from "../../utils/roleLabels";
-
-interface IUser {
-  name: string;
-  role: string;
-  email: string;
-  image?: string;
-}
+import { useAuthContext } from "@/context/auth.context";
 
 interface ILink {
   id: number;
@@ -39,34 +31,26 @@ const links: ILink[] = [
   },
 ];
 
+// Função para truncar o nome mostrando apenas as 3 primeiras palavras
+const truncateName = (name: string): string => {
+  if (!name) return "";
+  
+  const words = name.trim().split(/\s+/);
+  
+  if (words.length <= 3) {
+    return name;
+  }
+  
+  return words.slice(0, 3).join(" ") + "...";
+};
+
 const UserInfo = () => {
-  const [user, setUser] = useState<IUser>({ name: '', email: '', role: '' });
+  const { user, logout } = useAuthContext();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
   const triggerRef = useRef<HTMLDivElement>(null);
   const [menuWidth, setMenuWidth] = useState<number>(260);
   const [showLogout, setShowLogout] = useState(false);
-
-  useEffect(() => {
-    const fetchUser = async () => {
-      const token = localStorage.getItem('token');
-      if (!token) {
-        setUser({ name: '', email: '', role: '' });
-        return;
-      }
-      try {
-        const userData = await authService.getCurrentUser(token);
-        if (userData && typeof userData === 'object' && 'user' in userData) {
-          setUser(userData.user as IUser);
-        } else {
-          setUser({ name: '', email: '', role: '' });
-        }
-      } catch {
-        setUser({ name: '', email: '', role: '' });
-      }
-    };
-    fetchUser();
-  }, []);
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -99,18 +83,10 @@ const UserInfo = () => {
   };
 
   const handleSignOut = async () => {
-    const token = localStorage.getItem('token');
-    if (token) {
-      try {
-        await authService.logout(token);
-      } catch {
-        // ignore
-      }
-    }
-    localStorage.removeItem('token');
-    localStorage.removeItem('user');
-    window.location.href = '/login';
+    await logout();
   };
+
+  const displayName = truncateName(user?.name || "Usuário");
 
   return (
     <div className="relative">
@@ -119,18 +95,14 @@ const UserInfo = () => {
         className="flex cursor-pointer"
         onClick={() => setIsMenuOpen((prev) => !prev)}
       >
-        {user?.image ? (
-          <div className="w-[42px] h-[42px] rounded-full overflow-hidden mr-2 md:mr-4">
-            <Image src={user.image} alt={user.name} width={42} height={42} />
-          </div>
-        ) : (
-          <div className="w-[42px] h-[42px] rounded-full bg-gray-300 flex items-center justify-center text-xl font-bold text-white mr-2 md:mr-4">
-            {user?.name?.charAt(0).toUpperCase() || "U"}
-          </div>
-        )}
+        <div className="w-[42px] h-[42px] rounded-full bg-gray-300 flex items-center justify-center text-xl font-bold text-white mr-2 md:mr-4">
+          {user?.name?.charAt(0).toUpperCase() || "U"}
+        </div>
         <div className="flex flex-col mr-2 md:mr-8">
-          <span className="text-md font-bold">{user?.name || "Usuário"}</span>
-          <span className="text-sm">{getRoleLabel(user.role)}</span>
+          <span className="text-md font-bold" title={user?.name || "Usuário"}>
+            {displayName}
+          </span>
+          <span className="text-sm">{getRoleLabel(user?.role || 'user')}</span>
         </div>
       </div>
 

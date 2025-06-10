@@ -2,7 +2,6 @@
 
 namespace App\Http\Requests;
 
-use App\Helpers\StringHelper;
 use Illuminate\Foundation\Http\FormRequest;
 
 class LoginRequest extends FormRequest
@@ -15,25 +14,15 @@ class LoginRequest extends FormRequest
     protected function prepareForValidation(): void
     {
         if ($this->filled('document')) {
-            $this->merge([
-                'document' => StringHelper::onlyNumbers($this->document)
-            ]);
+            $document = preg_replace('/[^0-9]/', '', $this->document);
+            $this->merge(['document' => $document]);
         }
     }
 
     public function rules(): array
     {
         return [
-            'document' => [
-                'required',
-                'string',
-                'exists:users,document',
-                function ($attribute, $value, $fail) {
-                    if (!preg_match('/[0-9]/', $value)) {
-                        $fail('O documento deve conter números');
-                    }
-                },
-            ],
+            'document' => ['required', 'string'],
             'password' => ['required', 'string'],
         ];
     }
@@ -42,7 +31,6 @@ class LoginRequest extends FormRequest
     {
         return [
             'document.required' => 'O documento é obrigatório',
-            'document.exists' => 'Usuário não encontrado, confira os dados informados',
             'password.required' => 'A senha é obrigatória',
         ];
     }
