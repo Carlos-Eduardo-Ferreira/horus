@@ -1,6 +1,6 @@
 'use client'
 
-import React from 'react'
+import React, { forwardRef } from 'react'
 import Link from 'next/link'
 import { cn } from '@/utils/classNames'
 
@@ -21,7 +21,7 @@ export interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElemen
   buttonType?: 'regular' | 'compact'
 }
 
-export default function Button({
+const Button = forwardRef<HTMLButtonElement, ButtonProps>(({
   variant = 'primary',
   outline = false,
   className,
@@ -32,7 +32,7 @@ export default function Button({
   buttonType = 'regular',
   onClick,
   ...rest
-}: ButtonProps) {
+}, ref) => {
 
   const base = cn(
     'inline-flex items-center justify-center px-4',
@@ -81,6 +81,7 @@ export default function Button({
 
   return (
     <button
+      ref={ref}
       type={type}
       className={cn(base, style, className)}
       disabled={disabled}
@@ -90,4 +91,8 @@ export default function Button({
       {children}
     </button>
   )
-}
+})
+
+Button.displayName = 'Button';
+
+export default Button

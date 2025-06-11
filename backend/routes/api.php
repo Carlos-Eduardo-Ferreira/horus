@@ -61,4 +61,16 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::put('modules/{module}', 'storeOrUpdate');
         Route::delete('modules/{module}', 'destroy');
     });
+
+    // Permissions
+    Route::controller(\App\Http\Controllers\PermissionController::class)->group(function () {
+        Route::get('modules/{module}/actions', 'getModuleActions');
+        Route::put('modules/{module}/actions', 'updateModuleActions');
+    });
+
+    // Role Permissions (User Permissions)
+    Route::controller(\App\Http\Controllers\RolePermissionsController::class)->group(function () {
+        Route::get('users/{user}/permissions', 'getUserRolePermissions');
+        Route::put('users/{user}/permissions', 'updateUserRolePermissions');
+    });
 });

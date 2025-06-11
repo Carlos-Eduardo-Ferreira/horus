@@ -33,6 +33,12 @@ export interface EntityListPageProps<T extends { id: number }> {
   actionsColumnWidth?: number;
   canEdit?: (item: T) => boolean;
   canDelete?: (item: T) => boolean;
+  canConfigure?: (item: T) => boolean;
+  onConfigure?: (item: T) => void;
+  configureTooltip?: string;
+  configureDisabledTooltip?: string;
+  editDisabledTooltip?: string;
+  deleteDisabledTooltip?: string;
 }
 
 export default function EntityListPage<T extends { id: number }>({
@@ -45,6 +51,12 @@ export default function EntityListPage<T extends { id: number }>({
   actionsColumnWidth = 10,
   canEdit,
   canDelete,
+  canConfigure,
+  onConfigure,
+  configureTooltip,
+  configureDisabledTooltip,
+  editDisabledTooltip,
+  deleteDisabledTooltip,
 }: EntityListPageProps<T>) {
   // Define o título da aba da página dinamicamente
   usePageTitle(title);
@@ -159,6 +171,12 @@ export default function EntityListPage<T extends { id: number }>({
       onSort={handleSort}
       canEdit={canEdit}
       canDelete={canDelete}
+      canConfigure={canConfigure}
+      onConfigure={onConfigure}
+      configureTooltip={configureTooltip}
+      configureDisabledTooltip={configureDisabledTooltip}
+      editDisabledTooltip={editDisabledTooltip}
+      deleteDisabledTooltip={deleteDisabledTooltip}
     />
   );
 }

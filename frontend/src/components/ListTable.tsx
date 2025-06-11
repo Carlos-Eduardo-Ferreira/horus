@@ -15,6 +15,7 @@ import { ConfirmModal } from "@/components/ConfirmModal";
 import { ExclamationTriangleIcon } from "@heroicons/react/24/outline";
 import { FilterModal, FilterField, FilterValues } from "@/components/FilterModal";
 import { BiSortZA, BiSortAZ } from "react-icons/bi";
+import { GoGear } from "react-icons/go";
 
 export type ListTableColumn<T> = {
   key: keyof T;
@@ -55,6 +56,12 @@ export type ListTableProps<T> = {
   onSort?: (sortConfig: SortConfig) => void;
   canEdit?: (item: T) => boolean;
   canDelete?: (item: T) => boolean;
+  canConfigure?: (item: T) => boolean;
+  onConfigure?: (item: T) => void;
+  configureTooltip?: string;
+  configureDisabledTooltip?: string;
+  editDisabledTooltip?: string;
+  deleteDisabledTooltip?: string;
 };
 
 export function ListTable<T extends { id: number }>({
@@ -82,6 +89,12 @@ export function ListTable<T extends { id: number }>({
   onSort,
   canEdit,
   canDelete,
+  canConfigure,
+  onConfigure,
+  configureTooltip = "Configurar",
+  configureDisabledTooltip = "Não é possível configurar este registro",
+  editDisabledTooltip = "Não é possível editar este registro",
+  deleteDisabledTooltip = "Não é possível excluir este registro",
 }: ListTableProps<T>) {
   const router = useRouter();
 
@@ -208,6 +221,26 @@ export function ListTable<T extends { id: number }>({
       sortable: false,
       render: (_value: T[keyof T], row: T) => (
         <div className="flex gap-2 justify-center">
+          {/* Botão de configurar */}
+          {onConfigure && (!canConfigure || canConfigure(row)) ? (
+            <Tooltip content={configureTooltip}>
+              <ActionButton
+                icon={GoGear as React.ForwardRefExoticComponent<React.ComponentProps<'svg'>>}
+                color="warning"
+                onClick={() => onConfigure(row)}
+              />
+            </Tooltip>
+          ) : onConfigure && canConfigure && !canConfigure(row) ? (
+            <Tooltip content={configureDisabledTooltip}>
+              <ActionButton
+                icon={GoGear as React.ForwardRefExoticComponent<React.ComponentProps<'svg'>>}
+                color="secondary"
+                disabled
+                className="cursor-not-allowed opacity-50"
+              />
+            </Tooltip>
+          ) : null}
+
           {/* Botão de editar */}
           {!canEdit || canEdit(row) ? (
             <Tooltip content="Editar">
@@ -218,7 +251,7 @@ export function ListTable<T extends { id: number }>({
               />
             </Tooltip>
           ) : (
-            <Tooltip content="Não é possível editar este usuário">
+            <Tooltip content={editDisabledTooltip}>
               <ActionButton
                 icon={GoPencil as React.ForwardRefExoticComponent<React.ComponentProps<'svg'>>}
                 color="secondary"
@@ -238,7 +271,7 @@ export function ListTable<T extends { id: number }>({
               />
             </Tooltip>
           ) : (
-            <Tooltip content="Não é possível excluir este usuário">
+            <Tooltip content={deleteDisabledTooltip}>
               <ActionButton
                 icon={AiOutlineDelete as React.ForwardRefExoticComponent<React.ComponentProps<'svg'>>}
                 color="secondary"

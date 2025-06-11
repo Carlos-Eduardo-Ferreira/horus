@@ -7,8 +7,9 @@ import {
   TransitionChild,
 } from '@headlessui/react';
 import clsx from 'clsx';
-import { useRef, ReactNode } from 'react';
+import { useRef, ReactNode, useEffect } from 'react';
 import Button from '@/components/Button';
+import { disableTooltipsTemporarily } from '@/components/Tooltip';
 
 interface ConfirmModalProps {
   show: boolean;
@@ -40,6 +41,23 @@ export function ConfirmModal({
   const dialogProps = confirmLoading
     ? { onClose: () => {}, static: true }
     : { onClose };
+
+  // Remove o foco quando o modal é fechado
+  useEffect(() => {
+    if (!show) {
+      // Desabilita tooltips temporariamente
+      disableTooltipsTemporarily();
+      
+      // Remove o foco de qualquer elemento
+      const timeoutId = setTimeout(() => {
+        if (document.activeElement instanceof HTMLElement) {
+          document.activeElement.blur();
+        }
+      }, 50);
+
+      return () => clearTimeout(timeoutId);
+    }
+  }, [show]);
 
   return (
     <Transition
@@ -76,8 +94,14 @@ export function ConfirmModal({
         )}
       >
         <div className="mt-2">
-          {title && <h3 className="text-xl text-gray-800 dark:text-dark-100">{title}</h3>}
-          {description && <p className="mx-auto mt-2 max-w-xs">{description}</p>}
+          {title && (
+            <h3 className="text-xl text-gray-800 dark:text-dark-100">
+              {title}
+            </h3>
+          )}
+          {description && (
+            <p className="mx-auto mt-2 max-w-xs">{description}</p>
+          )}
           {icon && <div className="mt-6 flex justify-center">{icon}</div>}
 
           <div className="mt-8 flex justify-center space-x-3">
@@ -90,6 +114,7 @@ export function ConfirmModal({
             </Button>
 
             <Button
+              ref={focusRef}
               onClick={onOk}
               variant="danger"
               disabled={confirmLoading}

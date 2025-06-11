@@ -39,7 +39,7 @@ export interface EntityFormPageProps<T extends EntityData = EntityData> {
   formatters?: { [key: string]: FormatterType };
   autoFillConfig?: AutoFillConfig;
   transformPayload?: (fields: DynamicFormField[]) => Partial<T>;
-  submitting?: boolean; // Adicionado para permitir controle externo do estado de submissão
+  submitting?: boolean;
 }
 
 export default function EntityFormPage<T extends EntityData = EntityData>({
