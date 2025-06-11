@@ -6,4 +6,6 @@ export type IMenuSideBarProps = {
   icon?: IconType;
   subMenu?: boolean;
   subMenuItems?: IMenuSideBarProps[];
+  permission?: string;
+  permissions?: string[];
 };

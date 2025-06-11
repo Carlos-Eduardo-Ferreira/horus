@@ -2,8 +2,9 @@ import { adminMenu } from "./adminMenu";
 import { companyMenu } from "./companyMenu";
 import { consumerMenu } from "./consumerMenu";
 import { IMenuSideBarProps } from "./types";
+import { UserRole } from "@/types/auth";
 
-export function getMenuByRole(role: string): IMenuSideBarProps[] {
+export function getMenuByRole(role: UserRole): IMenuSideBarProps[] {
   switch (role) {
     case "master":
     case "admin":

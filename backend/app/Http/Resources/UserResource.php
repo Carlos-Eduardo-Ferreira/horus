@@ -2,6 +2,7 @@
 
 namespace App\Http\Resources;
 
+use App\Services\PermissionService;
 use Illuminate\Http\Resources\Json\JsonResource;
 
 class UserResource extends JsonResource
@@ -24,6 +25,13 @@ class UserResource extends JsonResource
         if ($this->isCompany()) {
             $data['is_verified'] = $this->isVerifiedCompany();
             $data['verification_status'] = $this->getCompanyVerificationStatus();
+        }
+
+        // Adiciona permissões para roles administrativas (master, admin, user)
+        if ($role && in_array($role->identifier->value, ['master', 'admin', 'user'])) {
+            $permissionService = app(PermissionService::class);
+            $permissions = $permissionService->getUserPermissions($this->resource);
+            $data['permissions'] = $permissions->values()->all();
         }
 
         return $data;

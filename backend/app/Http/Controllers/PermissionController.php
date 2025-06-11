@@ -28,7 +28,7 @@ class PermissionController extends Controller
     public function updateModuleActions(Request $request, Module $module)
     {
         $request->validate([
-            'action_ids' => 'required|array',
+            'action_ids' => 'nullable|array',
             'action_ids.*' => 'exists:actions,id'
         ]);
 

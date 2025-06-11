@@ -63,7 +63,7 @@ class RolePermissionsController extends Controller
     public function updateUserRolePermissions(Request $request, User $user)
     {
         $request->validate([
-            'permission_ids' => 'required|array',
+            'permission_ids' => 'nullable|array',
             'permission_ids.*' => 'exists:permissions,id'
         ]);
 

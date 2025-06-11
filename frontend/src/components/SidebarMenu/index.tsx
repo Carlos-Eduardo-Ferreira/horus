@@ -2,9 +2,10 @@
 
 import { useGlobalHook } from "@/hooks/global.hook";
 import { useUserRole } from "@/hooks/useUserRole";
+import { useAuthHook } from "@/hooks/auth.hook";
 import { AnimatePresence, motion } from "framer-motion";
 import { useRouter, usePathname } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { CgClose } from "react-icons/cg";
 import { MdOutlineKeyboardArrowDown } from "react-icons/md";
 import { Tooltip as ReactTooltip } from "react-tooltip";
@@ -19,17 +20,69 @@ const iconSize = 20;
 const SidebarMenu = () => {
   const { isMenuOpen, toggleMenu } = useGlobalHook();
   const { userRole, isLoading } = useUserRole();
+  const { hasPermission } = useAuthHook();
   const [openSubMenu, setOpenSubMenu] = useState<number | null>(null);
   const [initialRender, setInitialRender] = useState(true);
   const [menuItems, setMenuItems] = useState<IMenuSideBarProps[]>([]);
   const router = useRouter();
   const pathname = usePathname();
 
+  // Verifica se o usuário tem acesso baseado nas permissões
+  const checkAccess = useCallback((item: IMenuSideBarProps): boolean => {
+    // Sem permissão requerida = acesso liberado
+    if (!item.permission && !item.permissions) return true;
+    
+    // Master sempre tem acesso total
+    if (String(userRole) === 'master') return true;
+    
+    // Consumer/company não usam sistema de permissões
+    if (!['admin', 'user'].includes(String(userRole))) return false;
+    
+    // Verifica array de permissões (qualquer uma garante acesso)
+    if (item.permissions?.length) {
+      return item.permissions.some(permission => hasPermission(permission));
+    }
+    
+    // Verifica permissão única
+    return item.permission ? hasPermission(item.permission) : false;
+  }, [userRole, hasPermission]);
+
+  // Filtra subitens de menu baseado nas permissões
+  const filterSubItems = useCallback((subItems: IMenuSideBarProps[]): IMenuSideBarProps[] => {
+    return subItems.filter(subItem => {
+      if (!subItem.permission) return true;
+      if (String(userRole) === 'master') return true;
+      return hasPermission(subItem.permission);
+    });
+  }, [userRole, hasPermission]);
+
+  // Filtro principal dos itens de menu
+  const filterMenuItems = useCallback((items: IMenuSideBarProps[]): IMenuSideBarProps[] => {
+    if (!userRole) return [];
+
+    return items.filter(item => {
+      const hasAccess = checkAccess(item);
+      
+      // Se tem acesso e é submenu, filtra os subitens
+      if (hasAccess && item.subMenu && item.subMenuItems) {
+        const filteredSubItems = filterSubItems(item.subMenuItems);
+        item.subMenuItems = filteredSubItems;
+        
+        // Mostra submenu apenas se houver itens visíveis
+        return filteredSubItems.length > 0;
+      }
+      
+      return hasAccess;
+    });
+  }, [userRole, checkAccess, filterSubItems]);
+
   useEffect(() => {
     if (!isLoading && userRole) {
-      setMenuItems(getMenuByRole(userRole));
+      const allMenuItems = getMenuByRole(userRole);
+      const filteredItems = filterMenuItems(allMenuItems);
+      setMenuItems(filteredItems);
     }
-  }, [userRole, isLoading]);
+  }, [userRole, isLoading, filterMenuItems]);
 
   const isItemActive = (item: IMenuSideBarProps): boolean => {
     if (!item.subMenu && item.path && pathname === item.path) {
@@ -97,7 +150,7 @@ const SidebarMenu = () => {
     },
   };
 
-  if (isLoading) {
+  if (isLoading || !userRole) {
     return null;
   }
 
@@ -124,7 +177,7 @@ const SidebarMenu = () => {
           width={isMenuOpen ? 150 : 44}
           height={64}
           className="py-4 cursor-pointer"
-          style={{ width: isMenuOpen ? "150px" : "44px", height: "64px" }}
+          style={{ width: isMenuOpen ? "150px" : "44px", height: "auto" }}
           priority
           onClick={() => handleNavigation(route('dashboard'))}
         />

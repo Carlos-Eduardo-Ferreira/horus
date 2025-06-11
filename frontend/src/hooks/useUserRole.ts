@@ -6,7 +6,7 @@ export function useUserRole() {
   const { user, isLoading } = useAuthContext();
   
   return { 
-    userRole: user?.role || 'user', 
+    userRole: user?.role, 
     isLoading 
   };
 }

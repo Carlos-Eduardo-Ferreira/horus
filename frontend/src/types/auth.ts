@@ -9,12 +9,14 @@ export interface User {
   role: UserRole;
   is_verified?: boolean;
   verification_status?: 'not_submitted' | 'pending' | 'approved' | 'rejected';
+  permissions?: string[];
 }
 
 export interface AuthState {
   user: User | null;
   isAuthenticated: boolean;
   isLoading: boolean;
+  permissions: string[];
 }
 
 export interface LoginCredentials {

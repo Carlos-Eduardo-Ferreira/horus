@@ -13,11 +13,17 @@ export const adminMenu: IMenuSideBarProps[] = [
     title: "Cadastros ACL",
     icon: MdSecurity,
     subMenu: true,
+    permissions: [
+      "users.access",
+      "local_units.access",
+      "actions.access",
+      "modules.access",
+    ],
     subMenuItems: [
-      { title: "Usuários", path: route("users") },
-      { title: "Unidades Locais", path: route("localUnits") },
-      { title: "Ações de Usuário", path: route("actions") },
-      { title: "Módulos", path: route("modules") },
+      { title: "Usuários", path: route("users"), permission: "users.access" },
+      { title: "Unidades Locais", path: route("localUnits"), permission: "local_units.access" },
+      { title: "Ações de Usuário", path: route("actions"), permission: "actions.access" },
+      { title: "Módulos", path: route("modules"), permission: "modules.access" },
     ],
   },
   {

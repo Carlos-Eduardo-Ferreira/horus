@@ -10,6 +10,7 @@ export function useAuth() {
     user: null,
     isAuthenticated: false,
     isLoading: true,
+    permissions: [],
   });
 
   const [authChecked, setAuthChecked] = useState(false);
@@ -30,6 +31,13 @@ export function useAuth() {
     }));
   }, []);
 
+  const setPermissions = useCallback((permissions: string[]) => {
+    setAuthState(prev => ({
+      ...prev,
+      permissions,
+    }));
+  }, []);
+
   const setLoading = useCallback((isLoading: boolean) => {
     setAuthState(prev => ({
       ...prev,
@@ -47,6 +55,7 @@ export function useAuth() {
     
     if (!token) {
       setUser(null);
+      setPermissions([]);
       setLoading(false);
       setAuthChecked(true);
       return;
@@ -54,26 +63,50 @@ export function useAuth() {
 
     try {
       const userData = await authService.getCurrentUser(token);
+      
       if (userData && userData.user) {
         setUser(userData.user as User);
+        const userPermissions = userData.user.permissions || [];
+        setPermissions(userPermissions);
       } else {
         setUser(null);
+        setPermissions([]);
         localStorage.removeItem('token');
       }
     } catch (error) {
       console.error('Error loading user:', error);
       setUser(null);
+      setPermissions([]);
       localStorage.removeItem('token');
     } finally {
       setLoading(false);
       setAuthChecked(true);
     }
-  }, [setUser, setLoading, isClient]);
+  }, [setUser, setPermissions, setLoading, isClient]);
+
+  const hasPermission = useCallback((permission: string): boolean => {
+    if (!authState.user) return false;
+    if (authState.user.role === 'master') return true;
+    if (['consumer', 'company'].includes(authState.user.role)) return false;
+
+    return authState.permissions.includes(permission);
+  }, [authState.user, authState.permissions]);
+
+  // Função para verificar se pode acessar um módulo
+  const canAccessModule = useCallback((moduleIdentifier: string): boolean => {
+    if (!authState.user) return false;
+    if (authState.user.role === 'master') return true;
+    if (['consumer', 'company'].includes(authState.user.role)) return false;
+
+    return authState.permissions.some(permission => 
+      permission.startsWith(`${moduleIdentifier}.`)
+    );
+  }, [authState.user, authState.permissions]);
 
   // Função para verificar autorização de rota
   const checkRouteAuthorization = useCallback((path: string, userRole: UserRole) => {
-    return canAccessRoute(path, userRole);
-  }, []);
+    return canAccessRoute(path, userRole, hasPermission);
+  }, [hasPermission]);
 
   // Função para fazer logout
   const logout = useCallback(async () => {
@@ -94,9 +127,10 @@ export function useAuth() {
     }
     
     setUser(null);
+    setPermissions([]);
     setLoading(false);
     router.push(route('login'));
-  }, [router, setUser, setLoading, isClient]);
+  }, [router, setUser, setPermissions, setLoading, isClient]);
 
   // Verificar autorização imediatamente quando temos token ou user
   const isAuthorizedForCurrentRoute = useCallback(() => {
@@ -170,6 +204,8 @@ export function useAuth() {
     loadUser,
     logout,
     checkRouteAuthorization,
+    hasPermission,
+    canAccessModule,
     isAuthorizedForCurrentRoute: isAuthorizedForCurrentRoute(),
     authChecked,
   };
