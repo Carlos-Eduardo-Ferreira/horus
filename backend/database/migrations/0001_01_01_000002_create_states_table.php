@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('states', function (Blueprint $table) {
             $table->id();
             $table->string('ibge_code', 2)->unique();
-            $table->string('abbreviation', 2)->unique();
+            $table->string('uf', 2)->unique();
             $table->string('name', 100);
             $table->timestamps();
         });

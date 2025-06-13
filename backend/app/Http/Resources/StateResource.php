@@ -11,7 +11,7 @@ class StateResource extends JsonResource
         return [
             'id' => $this->id,
             'ibge_code' => $this->ibge_code,
-            'abbreviation' => $this->abbreviation,
+            'uf' => $this->uf,
             'name' => $this->name,
         ];
     }

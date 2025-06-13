@@ -3,7 +3,7 @@ import axios from "axios";
 interface StateInfo {
   id: number;
   ibge_code: string;
-  abbreviation: string;
+  uf: string;
   name: string;
 }
 

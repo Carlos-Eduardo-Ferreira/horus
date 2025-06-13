@@ -11,7 +11,7 @@ class LocalUnitSeeder extends Seeder
 {
     public function run(): void
     {
-        $state = State::where('abbreviation', 'SP')->first();
+        $state = State::where('uf', 'SP')->first();
 
         DB::table('local_units')->updateOrInsert(
             ['id' => 1],

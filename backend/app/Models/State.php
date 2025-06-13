@@ -9,7 +9,7 @@ class State extends Model
 {
     protected $fillable = [
         'ibge_code',
-        'abbreviation',
+        'uf',
         'name'
     ];
 

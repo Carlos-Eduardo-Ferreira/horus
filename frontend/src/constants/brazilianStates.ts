@@ -30,7 +30,7 @@ export const BRAZILIAN_STATES = [
 
 export type BrazilianStateCode = typeof BRAZILIAN_STATES[number]['value'];
 
-export function findStateByAbbreviation(uf: string): typeof BRAZILIAN_STATES[number] | undefined {
+export function findStateByUf(uf: string): typeof BRAZILIAN_STATES[number] | undefined {
   return BRAZILIAN_STATES.find(state => state.value === uf.toUpperCase());
 }
 
@@ -38,7 +38,7 @@ export function findStateOptionByViaCepUF(
   uf: string, 
   stateOptions: { value: string; label: string }[]
 ): { value: string; label: string } | undefined {
-  const brazilianState = findStateByAbbreviation(uf);
+  const brazilianState = findStateByUf(uf);
   
   if (!brazilianState) {
     return undefined;
