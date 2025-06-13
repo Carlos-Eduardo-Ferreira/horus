@@ -3,7 +3,7 @@
 import { ReactNode, createContext, useContext, useEffect, useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { AuthState, UserRole } from "@/types/auth";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { route } from "@/config/namedRoutes";
 import LoadingSpinner from "@/components/LoadingSpinner";
 
@@ -26,9 +26,11 @@ const AuthContext = createContext<IAuthContext>({} as IAuthContext);
 const AuthProvider = ({ children }: IAuthProviderProps) => {
   const auth = useAuth();
   const pathname = usePathname();
+  const router = useRouter();
   const [isMounted, setIsMounted] = useState(false);
   const [localUnitError, setLocalUnitError] = useState<string | null>(null);
   const [localUnitChecked, setLocalUnitChecked] = useState(false);
+  const [redirecting, setRedirecting] = useState(false);
 
   useEffect(() => {
     setIsMounted(true);
@@ -70,7 +72,40 @@ const AuthProvider = ({ children }: IAuthProviderProps) => {
     }
   }, [localUnitError]);
 
-  if (!isMounted || !localUnitChecked) {
+  useEffect(() => {
+    if (!isMounted || !localUnitChecked) return;
+
+    const publicRoutes = [route("login"), route("register"), "/"];
+    const isPublicRoute = publicRoutes.some(routePath => pathname && pathname === routePath);
+
+    if (
+      isPublicRoute &&
+      auth.authChecked &&
+      auth.isAuthenticated &&
+      auth.user
+    ) {
+      setRedirecting(true);
+      const dashboard = (() => {
+        switch (auth.user.role) {
+          case "master":
+          case "admin":
+          case "user":
+            return route("dashboard");
+          case "company":
+            return route("companyDashboard");
+          case "consumer":
+            return route("consumerDashboard");
+          default:
+            return route("dashboard");
+        }
+      })();
+      router.replace(dashboard);
+    } else {
+      setRedirecting(false);
+    }
+  }, [isMounted, localUnitChecked, pathname, auth.authChecked, auth.isAuthenticated, auth.user, router]);
+
+  if (!isMounted || !localUnitChecked || redirecting) {
     return <LoadingSpinner />;
   }
 
