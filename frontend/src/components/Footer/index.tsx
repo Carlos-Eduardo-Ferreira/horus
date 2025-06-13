@@ -1,6 +1,5 @@
 "use client";
 
-import Image from "next/image";
 import Link from "next/link";
 import { useRef, useState } from "react";
 import { footerItemsData, linksData } from "./data";
@@ -78,13 +77,6 @@ const Footer = ({ className = "" }) => {
             </div>
             
             <div className="flex flex-col lg:flex-row justify-between items-start gap-8">
-              <Image
-                className="rounded-lg mb-4 lg:mb-0"
-                src="/assets/logo-colored.png"
-                alt="Logo"
-                width={160}
-                height={48}
-              />
               <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6 w-full text-gray-600 text-xs md:text-sm">
                 {footerItemsData.map((item) => (
                   <span key={item.id} className="font-medium">

@@ -1,4 +1,4 @@
-import axios from "axios";
+import axios from "@/lib/axios";
 import { User } from "@/types/auth";
 
 export interface LoginPayload {
@@ -23,17 +23,6 @@ export interface CurrentUserResponse {
   user: User;
 }
 
-function getLocalUnitHeader() {
-  if (typeof window !== "undefined") {
-    const host = window.location.hostname;
-    const parts = host.split(".");
-    if (parts.length > 1) {
-      return { "X-Local-Unit-Identifier": parts[0] };
-    }
-  }
-  return {};
-}
-
 function isAxiosError(error: unknown): error is { response: { status: number; data?: { message?: string } } } {
   return (
     typeof error === "object" &&
@@ -48,9 +37,7 @@ function isAxiosError(error: unknown): error is { response: { status: number; da
 export const authService = {
   async login(payload: LoginPayload): Promise<LoginResponse> {
     try {
-      const { data } = await axios.post<LoginResponse>('/api/login', payload, {
-        headers: { ...getLocalUnitHeader() }
-      });
+      const { data } = await axios.post<LoginResponse>('/api/login', payload);
       return data;
     } catch (error: unknown) {
       if (isAxiosError(error)) {
@@ -64,9 +51,7 @@ export const authService = {
 
   async register(payload: RegisterPayload): Promise<LoginResponse> {
     try {
-      const { data } = await axios.post<LoginResponse>('/api/register', payload, {
-        headers: { ...getLocalUnitHeader() }
-      });
+      const { data } = await axios.post<LoginResponse>('/api/register', payload);
       return data;
     } catch (error: unknown) {
       if (isAxiosError(error)) {
@@ -81,7 +66,7 @@ export const authService = {
   async getCurrentUser(token: string): Promise<CurrentUserResponse> {
     try {
       const { data } = await axios.get<CurrentUserResponse>('/api/me', {
-        headers: { Authorization: `Bearer ${token}`, ...getLocalUnitHeader() }
+        headers: { Authorization: `Bearer ${token}` }
       });
       return data;
     } catch (error: unknown) {
@@ -97,7 +82,7 @@ export const authService = {
   async logout(token: string): Promise<void> {
     try {
       await axios.post('/api/logout', {}, {
-        headers: { Authorization: `Bearer ${token}`, ...getLocalUnitHeader() }
+        headers: { Authorization: `Bearer ${token}` }
       });
     } catch (error: unknown) {
       if (isAxiosError(error)) {

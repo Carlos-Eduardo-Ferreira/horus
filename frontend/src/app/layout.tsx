@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import "~/styles/globals.css";
 import { AuthProvider } from "@/context/auth.context";
 import { GlobalContextProvider } from "@/context/global.context";
@@ -8,7 +8,11 @@ import { APP_NAME } from '@/utils/title-utils'
 export const metadata: Metadata = {
   title: APP_NAME,
   description: 'Sistema de gerenciamento',
-  viewport: 'width=device-width, initial-scale=1.0',
+};
+
+export const viewport: Viewport = {
+  width: 'device-width',
+  initialScale: 1.0,
 };
 
 export default function RootLayout({
