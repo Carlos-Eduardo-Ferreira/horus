@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import "~/styles/globals.css";
 import { AuthProvider } from "@/context/auth.context";
 import { GlobalContextProvider } from "@/context/global.context";
+import { LocalUnitProvider } from "@/context/localUnit.context";
 import { APP_NAME } from '@/utils/title-utils'
 
 export const metadata: Metadata = {
@@ -20,7 +21,9 @@ export default function RootLayout({
       <body>
         <GlobalContextProvider>
           <AuthProvider>
-            {children}
+            <LocalUnitProvider>
+              {children}
+            </LocalUnitProvider>
           </AuthProvider>
         </GlobalContextProvider>
       </body>

@@ -41,29 +41,24 @@ class AuthController extends Controller
             DB::beginTransaction();
 
             $data = $request->validated();
-            
-            // Pega o tipo de usuário
             $userType = $data['type'] ?? 'consumer';
-            
-            // Remove campos que não são do modelo User
             unset($data['password_confirmation']);
             unset($data['type']);
 
             $user = User::create($data);
 
-            // Determina a role baseada no tipo de usuário
             $roleIdentifier = match($userType) {
                 'company' => 'company',
                 'consumer' => 'consumer',
-                default => 'consumer'
             };
 
-            // Associar role baseada no tipo
+            $localUnitId = app('currentLocalUnit')->id;
+
             $role = Role::where('identifier', $roleIdentifier)->firstOrFail();
             UserRole::create([
                 'user_id' => $user->id,
                 'role_id' => $role->id,
-                'local_unit_id' => 1
+                'local_unit_id' => $localUnitId
             ]);
 
             // Se for empresa, cria registro em company_validations

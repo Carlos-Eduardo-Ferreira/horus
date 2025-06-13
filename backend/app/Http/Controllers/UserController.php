@@ -66,8 +66,6 @@ class UserController extends Controller
 
             $data = $request->validated();
             $data['document'] = preg_replace('/[^0-9]/', '', $data['document']);
-            
-            // Remove password_confirmation do array de dados
             unset($data['password_confirmation']);
 
             // Se name ou legal_name vierem como string vazia, transforma em null
@@ -85,15 +83,15 @@ class UserController extends Controller
 
                 $user->update($data);
             } else {
-                // Criar novo usuário sempre como 'user'
                 $user = User::create($data);
+                $localUnitId = app('currentLocalUnit')->id;
 
                 // Associar role 'user'
                 $role = Role::where('identifier', 'user')->firstOrFail();
                 UserRole::create([
                     'user_id' => $user->id,
                     'role_id' => $role->id,
-                    'local_unit_id' => 1
+                    'local_unit_id' => $localUnitId
                 ]);
             }
 

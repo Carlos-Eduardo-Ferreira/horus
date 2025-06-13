@@ -23,27 +23,89 @@ export interface CurrentUserResponse {
   user: User;
 }
 
+function getLocalUnitHeader() {
+  if (typeof window !== "undefined") {
+    const host = window.location.hostname;
+    const parts = host.split(".");
+    if (parts.length > 1) {
+      return { "X-Local-Unit-Identifier": parts[0] };
+    }
+  }
+  return {};
+}
+
+function isAxiosError(error: unknown): error is { response: { status: number; data?: { message?: string } } } {
+  return (
+    typeof error === "object" &&
+    error !== null &&
+    "response" in error &&
+    typeof (error as { response?: unknown }).response === "object" &&
+    (error as { response?: { status?: unknown } }).response !== null &&
+    typeof (error as { response: { status?: unknown } }).response.status === "number"
+  );
+}
+
 export const authService = {
   async login(payload: LoginPayload): Promise<LoginResponse> {
-    const { data } = await axios.post<LoginResponse>('/api/login', payload);
-    return data;
+    try {
+      const { data } = await axios.post<LoginResponse>('/api/login', payload, {
+        headers: { ...getLocalUnitHeader() }
+      });
+      return data;
+    } catch (error: unknown) {
+      if (isAxiosError(error)) {
+        if (error.response.status === 400) {
+          throw new Error(error.response.data?.message || "Local unit inválido.");
+        }
+      }
+      throw error;
+    }
   },
 
   async register(payload: RegisterPayload): Promise<LoginResponse> {
-    const { data } = await axios.post<LoginResponse>('/api/register', payload);
-    return data;
+    try {
+      const { data } = await axios.post<LoginResponse>('/api/register', payload, {
+        headers: { ...getLocalUnitHeader() }
+      });
+      return data;
+    } catch (error: unknown) {
+      if (isAxiosError(error)) {
+        if (error.response.status === 400) {
+          throw new Error(error.response.data?.message || "Local unit inválido.");
+        }
+      }
+      throw error;
+    }
   },
 
   async getCurrentUser(token: string): Promise<CurrentUserResponse> {
-    const { data } = await axios.get<CurrentUserResponse>('/api/me', {
-      headers: { Authorization: `Bearer ${token}` }
-    });
-    return data;
+    try {
+      const { data } = await axios.get<CurrentUserResponse>('/api/me', {
+        headers: { Authorization: `Bearer ${token}`, ...getLocalUnitHeader() }
+      });
+      return data;
+    } catch (error: unknown) {
+      if (isAxiosError(error)) {
+        if (error.response.status === 400) {
+          throw new Error(error.response.data?.message || "Local unit inválido.");
+        }
+      }
+      throw error;
+    }
   },
 
   async logout(token: string): Promise<void> {
-    await axios.post('/api/logout', {}, {
-      headers: { Authorization: `Bearer ${token}` }
-    });
+    try {
+      await axios.post('/api/logout', {}, {
+        headers: { Authorization: `Bearer ${token}`, ...getLocalUnitHeader() }
+      });
+    } catch (error: unknown) {
+      if (isAxiosError(error)) {
+        if (error.response.status === 400) {
+          throw new Error(error.response.data?.message || "Local unit inválido.");
+        }
+      }
+      throw error;
+    }
   }
 };
